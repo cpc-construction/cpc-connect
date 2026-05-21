@@ -482,26 +482,34 @@ async function doLogout() {
 }
 
 sb.auth.onAuthStateChange(async (event, session) => {
+  if (event === 'SIGNED_OUT') {
+    currentUser = null;
+    userRole = 'user';
+    userName = '';
+    document.getElementById('auth-screen').style.display = 'flex';
+    document.getElementById('app').classList.remove('visible');
+    return;
+  }
   if (session && session.user) {
     currentUser = session.user;
     await loadRole();
     showApp();
-  } else {
-    currentUser = null;
-    document.getElementById('auth-screen').style.display = 'flex';
-    document.getElementById('app').classList.remove('visible');
   }
 });
 
 async function loadRole() {
-  const { data } = await sb.from('cpc_user_roles').select('*').eq('user_id', currentUser.id).single();
-  if (data) {
-    userRole = data.role;
-    userName = data.display_name || currentUser.email.split('@')[0];
-  } else {
+  try {
     userRole = 'user';
     userName = currentUser.email.split('@')[0];
-    await sb.from('cpc_user_roles').insert({ user_id: currentUser.id, email: currentUser.email, display_name: userName, role: 'user' }).then(()=>{}).catch(()=>{});
+    const { data, error } = await sb.from('cpc_user_roles').select('*').eq('user_id', currentUser.id).maybeSingle();
+    if (data) {
+      userRole = data.role;
+      userName = data.display_name || userName;
+    } else {
+      await sb.from('cpc_user_roles').insert({ user_id: currentUser.id, email: currentUser.email, display_name: userName, role: 'user' }).then(()=>{}).catch(()=>{});
+    }
+  } catch(e) {
+    console.log('Role load error:', e);
   }
 }
 
