@@ -714,18 +714,27 @@ async function deleteAnn(id) { if(!confirm('Delete this announcement?'))return; 
 
 // ===== CHANGE PASSWORD =====
 async function doChangePassword() {
+  const oldPw = document.getElementById('old-pw').value;
   const pw1 = document.getElementById('new-pw-1').value;
   const pw2 = document.getElementById('new-pw-2').value;
   const msg = document.getElementById('pw-msg');
   msg.className = 'auth-msg error';
-  if (!pw1 || !pw2) { msg.textContent = 'Please fill in both fields'; return; }
-  if (pw1.length < 6) { msg.textContent = 'Password must be at least 6 characters'; return; }
-  if (pw1 !== pw2) { msg.textContent = 'Passwords do not match'; return; }
+  if (!oldPw) { msg.textContent = 'Please enter your current password'; return; }
+  if (!pw1 || !pw2) { msg.textContent = 'Please fill in new password fields'; return; }
+  if (pw1.length < 6) { msg.textContent = 'New password must be at least 6 characters'; return; }
+  if (pw1 !== pw2) { msg.textContent = 'New passwords do not match'; return; }
+  if (oldPw === pw1) { msg.textContent = 'New password must be different from current password'; return; }
   msg.className = 'auth-msg success';
+  msg.textContent = 'Verifying...';
+  // Verify old password by signing in again
+  const { error: verifyError } = await sb.auth.signInWithPassword({ email: currentUser.email, password: oldPw });
+  if (verifyError) { msg.className = 'auth-msg error'; msg.textContent = 'Current password is incorrect'; return; }
   msg.textContent = 'Saving...';
   const { error } = await sb.auth.updateUser({ password: pw1 });
   if (error) { msg.className = 'auth-msg error'; msg.textContent = error.message; return; }
+  msg.className = 'auth-msg success';
   msg.textContent = 'Password changed successfully!';
+  document.getElementById('old-pw').value = '';
   document.getElementById('new-pw-1').value = '';
   document.getElementById('new-pw-2').value = '';
   setTimeout(() => closeModal('modal-changepw'), 1500);
@@ -743,6 +752,7 @@ function esc(t) { return t.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>
 <div class="modal-overlay" id="modal-changepw">
   <div class="modal">
     <div class="modal-title">Change Password</div>
+    <div class="modal-field"><label>Current Password</label><input type="password" id="old-pw" placeholder="Enter current password"/></div>
     <div class="modal-field"><label>New Password</label><input type="password" id="new-pw-1" placeholder="Min 6 characters"/></div>
     <div class="modal-field"><label>Confirm New Password</label><input type="password" id="new-pw-2" placeholder="Repeat new password"/></div>
     <div class="auth-msg" id="pw-msg"></div>
