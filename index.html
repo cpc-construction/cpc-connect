@@ -9,7 +9,7 @@
 <link rel="manifest" href="manifest.json"/>
 <meta name="theme-color" content="#4a3728"/>
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@2.44.0/tabler-icons.min.css"/>
-<script src="https://unpkg.com/@supabase/supabase-js@2"></script>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.39.0/dist/umd/supabase.min.js"></script>
 <script src="config.js"></script>
 <style>
   :root {
@@ -491,8 +491,7 @@
 </div>
 
 <script>
-const { createClient } = supabase;
-const sb = createClient(CONFIG.SUPABASE_URL, CONFIG.SUPABASE_KEY);
+const sb = supabase.createClient(CONFIG.SUPABASE_URL, CONFIG.SUPABASE_KEY);
 
 let currentUser = null;
 let currentUserRole = null;
