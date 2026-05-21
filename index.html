@@ -434,6 +434,16 @@ let chatSub = null;
 let allApps = [];
 let dragSrc = null;
 
+// ===== SCREEN HELPERS =====
+function showLoginScreen() {
+  document.getElementById('auth-screen').style.display = 'flex';
+  document.getElementById('app').classList.remove('visible');
+}
+function showAppScreen() {
+  document.getElementById('auth-screen').style.display = 'none';
+  document.getElementById('app').classList.add('visible');
+}
+
 // ===== AUTH =====
 function switchTab(tab) {
   document.querySelectorAll('.auth-tab').forEach((t,i) => t.classList.toggle('active', (i===0&&tab==='login')||(i===1&&tab==='register')));
@@ -452,10 +462,15 @@ async function doLogin() {
   const email = document.getElementById('login-email').value.trim();
   const pass = document.getElementById('login-pass').value;
   if (!email || !pass) { showMsg('Please enter email and password', true); return; }
-  showMsg('Logging in...', false);
-  const { error } = await sb.auth.signInWithPassword({ email, password: pass });
+  const btn = document.querySelector('#login-form .auth-btn');
+  btn.textContent = 'Logging in...'; btn.disabled = true;
+  const { data, error } = await sb.auth.signInWithPassword({ email, password: pass });
+  btn.textContent = 'Login'; btn.disabled = false;
   if (error) { showMsg(error.message, true); return; }
-  showMsg('', false);
+  currentUser = data.user;
+  await loadRole();
+  setupApp();
+  showAppScreen();
 }
 
 async function doRegister() {
@@ -465,11 +480,13 @@ async function doRegister() {
   if (!name) { showMsg('Please enter your name', true); return; }
   if (!email) { showMsg('Please enter your email', true); return; }
   if (pass.length < 6) { showMsg('Password must be at least 6 characters', true); return; }
-  showMsg('Registering...', false);
+  const btn = document.querySelector('#register-form .auth-btn');
+  btn.textContent = 'Registering...'; btn.disabled = true;
   const { data, error } = await sb.auth.signUp({ email, password: pass });
+  btn.textContent = 'Register'; btn.disabled = false;
   if (error) { showMsg(error.message, true); return; }
   if (data.user) {
-    await sb.from('cpc_user_roles').insert({ user_id: data.user.id, email, display_name: name, role: 'user' }).then(() => {}).catch(() => {});
+    await sb.from('cpc_user_roles').insert({ user_id: data.user.id, email, display_name: name, role: 'user' }).then(()=>{}).catch(()=>{});
     showMsg('Registered! You can now login.', false);
     switchTab('login');
     document.getElementById('login-email').value = email;
@@ -478,42 +495,49 @@ async function doRegister() {
 
 async function doLogout() {
   if (chatSub) { chatSub.unsubscribe(); chatSub = null; }
+  currentUser = null; userRole = 'user'; userName = '';
   await sb.auth.signOut();
+  showLoginScreen();
 }
-
-sb.auth.onAuthStateChange(async (event, session) => {
-  if (event === 'SIGNED_OUT') {
-    currentUser = null;
-    userRole = 'user';
-    userName = '';
-    document.getElementById('auth-screen').style.display = 'flex';
-    document.getElementById('app').classList.remove('visible');
-    return;
-  }
-  if (session && session.user) {
-    currentUser = session.user;
-    await loadRole();
-    showApp();
-  }
-});
 
 async function loadRole() {
   try {
     userRole = 'user';
     userName = currentUser.email.split('@')[0];
-    const { data, error } = await sb.from('cpc_user_roles').select('*').eq('user_id', currentUser.id).maybeSingle();
+    const { data } = await sb.from('cpc_user_roles').select('*').eq('user_id', currentUser.id).maybeSingle();
     if (data) {
       userRole = data.role;
       userName = data.display_name || userName;
     } else {
       await sb.from('cpc_user_roles').insert({ user_id: currentUser.id, email: currentUser.email, display_name: userName, role: 'user' }).then(()=>{}).catch(()=>{});
     }
-  } catch(e) {
-    console.log('Role load error:', e);
-  }
+  } catch(e) { console.log('Role load error:', e); }
 }
 
-function showApp() {
+// ===== BOOT =====
+(async () => {
+  const timer = setTimeout(async () => {
+    try { await sb.auth.signOut(); } catch(e) {}
+    showLoginScreen();
+  }, 8000);
+  try {
+    const { data: { session }, error } = await sb.auth.getSession();
+    if (error || !session) { clearTimeout(timer); showLoginScreen(); return; }
+    const { data: { user }, error: ue } = await sb.auth.getUser();
+    if (ue || !user) { clearTimeout(timer); await sb.auth.signOut(); showLoginScreen(); return; }
+    currentUser = user;
+    await loadRole();
+    clearTimeout(timer);
+    setupApp();
+    showAppScreen();
+  } catch(e) {
+    clearTimeout(timer);
+    try { await sb.auth.signOut(); } catch(e2) {}
+    showLoginScreen();
+  }
+})();
+
+function setupApp() {
   document.getElementById('auth-screen').style.display = 'none';
   document.getElementById('app').classList.add('visible');
   setupProfile();
