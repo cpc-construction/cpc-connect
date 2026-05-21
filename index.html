@@ -533,7 +533,7 @@ async function doRegister() {
   const { data, error } = await sb.auth.signUp({ email, password: pass });
   if (error) { document.getElementById('auth-error').textContent = error.message; return; }
   if (data.user) {
-    await sb.from('cpc_user_roles').upsert({ user_id: data.user.id, email, display_name: name, role: 'user' });
+    try { await sb.from('cpc_user_roles').insert({ user_id: data.user.id, email, display_name: name, role: 'user' }); } catch(e) {};
     document.getElementById('auth-error').style.color = 'green';
     document.getElementById('auth-error').textContent = 'Registered! Check email to verify, then login.';
   }
