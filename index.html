@@ -335,6 +335,9 @@ html, body { height: 100%; background: var(--cream); font-family: -apple-system,
           <div class="profile-menu-item hidden" id="admin-menu" onclick="showPage('admin')">
             <i class="ti ti-settings"></i><span>Admin Panel</span>
           </div>
+          <div class="profile-menu-item" onclick="openModal('modal-changepw')">
+            <i class="ti ti-lock"></i><span>Change Password</span>
+          </div>
           <div class="profile-menu-item logout-item" onclick="doLogout()">
             <i class="ti ti-logout"></i><span>Logout</span>
           </div>
@@ -709,6 +712,25 @@ async function saveAnnouncement() {
 }
 async function deleteAnn(id) { if(!confirm('Delete this announcement?'))return; await sb.from('cpc_announcements').delete().eq('id',id); loadHomeNews();loadAdminData(); }
 
+// ===== CHANGE PASSWORD =====
+async function doChangePassword() {
+  const pw1 = document.getElementById('new-pw-1').value;
+  const pw2 = document.getElementById('new-pw-2').value;
+  const msg = document.getElementById('pw-msg');
+  msg.className = 'auth-msg error';
+  if (!pw1 || !pw2) { msg.textContent = 'Please fill in both fields'; return; }
+  if (pw1.length < 6) { msg.textContent = 'Password must be at least 6 characters'; return; }
+  if (pw1 !== pw2) { msg.textContent = 'Passwords do not match'; return; }
+  msg.className = 'auth-msg success';
+  msg.textContent = 'Saving...';
+  const { error } = await sb.auth.updateUser({ password: pw1 });
+  if (error) { msg.className = 'auth-msg error'; msg.textContent = error.message; return; }
+  msg.textContent = 'Password changed successfully!';
+  document.getElementById('new-pw-1').value = '';
+  document.getElementById('new-pw-2').value = '';
+  setTimeout(() => closeModal('modal-changepw'), 1500);
+}
+
 // ===== UTILS =====
 function timeAgo(ts) {
   const d=Date.now()-new Date(ts).getTime(), m=Math.floor(d/60000), h=Math.floor(m/60), dd=Math.floor(h/24);
@@ -717,5 +739,19 @@ function timeAgo(ts) {
 function fmtTime(ts) { return new Date(ts).toLocaleTimeString('en-SG',{hour:'2-digit',minute:'2-digit'}); }
 function esc(t) { return t.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/\n/g,'<br>'); }
 </script>
+<!-- CHANGE PASSWORD MODAL -->
+<div class="modal-overlay" id="modal-changepw">
+  <div class="modal">
+    <div class="modal-title">Change Password</div>
+    <div class="modal-field"><label>New Password</label><input type="password" id="new-pw-1" placeholder="Min 6 characters"/></div>
+    <div class="modal-field"><label>Confirm New Password</label><input type="password" id="new-pw-2" placeholder="Repeat new password"/></div>
+    <div class="auth-msg" id="pw-msg"></div>
+    <div class="modal-btns">
+      <button class="modal-cancel" onclick="closeModal('modal-changepw');document.getElementById('pw-msg').textContent=''">Cancel</button>
+      <button class="modal-save" onclick="doChangePassword()">Save</button>
+    </div>
+  </div>
+</div>
+
 </body>
 </html>
