@@ -119,7 +119,7 @@ html, body { height: 100%; background: var(--cream); font-family: -apple-system,
 .news-meta { font-size: 11px; color: var(--text3); margin-top: 3px; }
 
 /* CHAT */
-.chat-wrap { display: flex; flex-direction: column; height: 100%; position: absolute; inset: 0; bottom: 64px; }
+.chat-wrap { display: flex; flex-direction: column; position: absolute; top: 0; left: 0; right: 0; bottom: 0; }
 .chat-header { padding: 14px 16px 10px; background: var(--surface); border-bottom: 1px solid var(--border); flex-shrink: 0; }
 .chat-header h2 { font-size: 16px; font-weight: 600; }
 .chat-header p { font-size: 12px; color: var(--text3); margin-top: 2px; }
@@ -279,7 +279,7 @@ html, body { height: 100%; background: var(--cream); font-family: -apple-system,
     </div>
 
     <!-- CHAT -->
-    <div class="page" id="page-chat">
+    <div class="page" id="page-chat" style="padding-bottom:0;overflow:hidden">
       <div class="chat-wrap">
         <div class="chat-header">
           <h2>Company Chat</h2>
