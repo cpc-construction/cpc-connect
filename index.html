@@ -371,7 +371,7 @@ html, body { height: 100%; background: var(--cream); font-family: -apple-system,
   <div class="modal">
     <div class="modal-title">Add App Tile</div>
     <div class="modal-field"><label>App Name</label><input type="text" id="app-name-in" placeholder="e.g. Vehicle Dashboard"/></div>
-    <div class="modal-field"><label>URL (paste here)</label><input type="url" id="app-url-in" placeholder="https://yourapp.netlify.app"/></div>
+    <div class="modal-field"><label>URL (paste here)</label><input type="url" id="app-url-in" placeholder="https://yourapp.github.io"/></div>
     <div class="modal-field"><label>Icon</label>
       <select id="app-icon-in">
         <option value="ti-truck">Vehicle / Truck</option>
@@ -425,8 +425,22 @@ html, body { height: 100%; background: var(--cream); font-family: -apple-system,
   </div>
 </div>
 
+<!-- CHANGE PASSWORD MODAL -->
+<div class="modal-overlay" id="modal-changepw">
+  <div class="modal">
+    <div class="modal-title">Change Password</div>
+    <div class="modal-field"><label>Current Password</label><input type="password" id="old-pw" placeholder="Enter current password"/></div>
+    <div class="modal-field"><label>New Password</label><input type="password" id="new-pw-1" placeholder="Min 6 characters"/></div>
+    <div class="modal-field"><label>Confirm New Password</label><input type="password" id="new-pw-2" placeholder="Repeat new password"/></div>
+    <div class="auth-msg" id="pw-msg"></div>
+    <div class="modal-btns">
+      <button class="modal-cancel" onclick="closeModal('modal-changepw');document.getElementById('pw-msg').textContent=''">Cancel</button>
+      <button class="modal-save" onclick="doChangePassword()">Save</button>
+    </div>
+  </div>
+</div>
+
 <script>
-// Init Supabase
 const sb = supabase.createClient(SUPA_URL, SUPA_KEY);
 
 let currentUser = null;
@@ -437,7 +451,6 @@ let chatSub = null;
 let allApps = [];
 let dragSrc = null;
 
-// ===== SCREEN HELPERS =====
 function showLoginScreen() {
   document.getElementById('auth-screen').style.display = 'flex';
   document.getElementById('app').classList.remove('visible');
@@ -447,7 +460,6 @@ function showAppScreen() {
   document.getElementById('app').classList.add('visible');
 }
 
-// ===== AUTH =====
 function switchTab(tab) {
   document.querySelectorAll('.auth-tab').forEach((t,i) => t.classList.toggle('active', (i===0&&tab==='login')||(i===1&&tab==='register')));
   document.getElementById('login-form').classList.toggle('hidden', tab!=='login');
@@ -508,16 +520,11 @@ async function loadRole() {
     userRole = 'user';
     userName = currentUser.email.split('@')[0];
     const { data } = await sb.from('cpc_user_roles').select('*').eq('user_id', currentUser.id).maybeSingle();
-    if (data) {
-      userRole = data.role;
-      userName = data.display_name || userName;
-    } else {
-      await sb.from('cpc_user_roles').insert({ user_id: currentUser.id, email: currentUser.email, display_name: userName, role: 'user' }).then(()=>{}).catch(()=>{});
-    }
-  } catch(e) { console.log('Role load error:', e); }
+    if (data) { userRole = data.role; userName = data.display_name || userName; }
+    else { await sb.from('cpc_user_roles').insert({ user_id: currentUser.id, email: currentUser.email, display_name: userName, role: 'user' }).then(()=>{}).catch(()=>{}); }
+  } catch(e) { console.log('Role error:', e); }
 }
 
-// ===== BOOT =====
 (async () => {
   const timer = setTimeout(async () => {
     try { await sb.auth.signOut(); } catch(e) {}
@@ -541,8 +548,6 @@ async function loadRole() {
 })();
 
 function setupApp() {
-  document.getElementById('auth-screen').style.display = 'none';
-  document.getElementById('app').classList.add('visible');
   setupProfile();
   loadWeather();
   loadApps();
@@ -554,7 +559,6 @@ function setupApp() {
   }
 }
 
-// ===== PROFILE =====
 function setupProfile() {
   document.getElementById('p-initial').textContent = userName.charAt(0).toUpperCase();
   document.getElementById('p-name').textContent = userName;
@@ -562,7 +566,6 @@ function setupProfile() {
   document.getElementById('p-role').textContent = userRole === 'admin' ? 'Admin' : 'User';
 }
 
-// ===== NAV =====
 function showPage(page) {
   document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
   document.querySelectorAll('.nav-btn').forEach(b => b.classList.remove('active'));
@@ -574,7 +577,6 @@ function showPage(page) {
   if (page === 'news') loadNewsPage();
 }
 
-// ===== WEATHER =====
 async function loadWeather() {
   const card = document.getElementById('weather-card');
   try {
@@ -584,9 +586,7 @@ async function loadWeather() {
     const days = ['Sun','Mon','Tue','Wed','Thu','Fri','Sat'];
     const fc = d.daily.time.slice(0,5).map((t,i) => `<div class="fc-day"><div class="fc-label">${days[new Date(t).getDay()]}</div><span class="fc-icon">${wEmoji(d.daily.weather_code[i])}</span><div class="fc-temp">${Math.round(d.daily.temperature_2m_max[i])}°</div></div>`).join('');
     card.innerHTML = `<div class="weather-top"><div><div class="weather-loc">📍 Singapore</div><div class="weather-temp-big">${Math.round(c.temperature_2m)}°C</div><div class="weather-desc">${wDesc(c.weather_code)}</div></div><div class="weather-emoji">${wEmoji(c.weather_code)}</div></div><div class="weather-stats"><div class="weather-stat"><i class="ti ti-droplet"></i><span>${c.relative_humidity_2m}% humidity</span></div><div class="weather-stat"><i class="ti ti-wind"></i><span>${c.wind_speed_10m} km/h</span></div><div class="weather-stat"><i class="ti ti-umbrella"></i><span>${c.precipitation_probability}% rain</span></div></div><div class="forecast">${fc}</div>`;
-  } catch(e) {
-    card.innerHTML = '<div class="loading-text" style="color:rgba(255,255,255,0.6)">Weather unavailable</div>';
-  }
+  } catch(e) { card.innerHTML = '<div class="loading-text" style="color:rgba(255,255,255,0.6)">Weather unavailable</div>'; }
 }
 function wEmoji(code) {
   if (code===0) return '☀️'; if (code<=2) return '⛅'; if (code<=3) return '☁️';
@@ -597,7 +597,6 @@ function wDesc(code) {
   if (code<=49) return 'Foggy'; if (code<=67) return 'Rainy'; return 'Thunderstorm';
 }
 
-// ===== APPS =====
 async function loadApps() {
   const { data } = await sb.from('cpc_apps').select('*').eq('is_active', true).order('sort_order');
   allApps = data || [];
@@ -615,7 +614,6 @@ function doSearch(v) { if(!v.trim()){renderApps(allApps);return;} renderApps(all
 function openApp(url, name) { if(!url||url==='#') return; document.getElementById('viewer-title').textContent=name; document.getElementById('viewer-frame').src=url; document.getElementById('app-viewer').classList.add('open'); }
 function closeViewer() { document.getElementById('app-viewer').classList.remove('open'); document.getElementById('viewer-frame').src='about:blank'; }
 
-// ===== NEWS =====
 async function loadHomeNews() {
   const { data } = await sb.from('cpc_announcements').select('*').order('created_at',{ascending:false}).limit(3);
   const el = document.getElementById('home-news');
@@ -631,7 +629,6 @@ async function loadNewsPage() {
   el.innerHTML = data.map(a=>`<div class="announce-card"><div class="announce-cat" style="background:${colors[a.category]||'#4a3728'}22;color:${colors[a.category]||'#4a3728'}">${a.category}</div><div class="announce-title">${a.title}</div>${a.body?`<div class="announce-body">${a.body}</div>`:''}<div class="announce-meta">Posted by ${a.posted_by} · ${timeAgo(a.created_at)}</div></div>`).join('');
 }
 
-// ===== CHAT =====
 function setupChat() {
   loadMessages();
   chatSub = sb.channel('cpc-chat').on('postgres_changes',{event:'INSERT',schema:'public',table:'cpc_messages'},p=>{
@@ -676,7 +673,6 @@ function updateBadge() {
   else{b.style.display='none';d.style.display='none';}
 }
 
-// ===== ADMIN =====
 async function loadAdminData() {
   if (userRole!=='admin') return;
   const {data:apps} = await sb.from('cpc_apps').select('*').order('sort_order');
@@ -712,7 +708,6 @@ async function saveAnnouncement() {
 }
 async function deleteAnn(id) { if(!confirm('Delete this announcement?'))return; await sb.from('cpc_announcements').delete().eq('id',id); loadHomeNews();loadAdminData(); }
 
-// ===== CHANGE PASSWORD =====
 async function doChangePassword() {
   const oldPw = document.getElementById('old-pw').value;
   const pw1 = document.getElementById('new-pw-1').value;
@@ -726,7 +721,6 @@ async function doChangePassword() {
   if (oldPw === pw1) { msg.textContent = 'New password must be different from current password'; return; }
   msg.className = 'auth-msg success';
   msg.textContent = 'Verifying...';
-  // Verify old password by signing in again
   const { error: verifyError } = await sb.auth.signInWithPassword({ email: currentUser.email, password: oldPw });
   if (verifyError) { msg.className = 'auth-msg error'; msg.textContent = 'Current password is incorrect'; return; }
   msg.textContent = 'Saving...';
@@ -737,10 +731,9 @@ async function doChangePassword() {
   document.getElementById('old-pw').value = '';
   document.getElementById('new-pw-1').value = '';
   document.getElementById('new-pw-2').value = '';
-  setTimeout(() => closeModal('modal-changepw'), 1500);
+  setTimeout(() => { closeModal('modal-changepw'); document.getElementById('pw-msg').textContent = ''; }, 1500);
 }
 
-// ===== UTILS =====
 function timeAgo(ts) {
   const d=Date.now()-new Date(ts).getTime(), m=Math.floor(d/60000), h=Math.floor(m/60), dd=Math.floor(h/24);
   if(dd>0)return dd+'d ago'; if(h>0)return h+'h ago'; if(m>0)return m+'m ago'; return 'Just now';
@@ -748,20 +741,5 @@ function timeAgo(ts) {
 function fmtTime(ts) { return new Date(ts).toLocaleTimeString('en-SG',{hour:'2-digit',minute:'2-digit'}); }
 function esc(t) { return t.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/\n/g,'<br>'); }
 </script>
-<!-- CHANGE PASSWORD MODAL -->
-<div class="modal-overlay" id="modal-changepw">
-  <div class="modal">
-    <div class="modal-title">Change Password</div>
-    <div class="modal-field"><label>Current Password</label><input type="password" id="old-pw" placeholder="Enter current password"/></div>
-    <div class="modal-field"><label>New Password</label><input type="password" id="new-pw-1" placeholder="Min 6 characters"/></div>
-    <div class="modal-field"><label>Confirm New Password</label><input type="password" id="new-pw-2" placeholder="Repeat new password"/></div>
-    <div class="auth-msg" id="pw-msg"></div>
-    <div class="modal-btns">
-      <button class="modal-cancel" onclick="closeModal('modal-changepw');document.getElementById('pw-msg').textContent=''">Cancel</button>
-      <button class="modal-save" onclick="doChangePassword()">Save</button>
-    </div>
-  </div>
-</div>
-
 </body>
 </html>
