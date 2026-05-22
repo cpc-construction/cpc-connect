@@ -740,6 +740,10 @@ function timeAgo(ts) {
 }
 function fmtTime(ts) { return new Date(ts).toLocaleTimeString('en-SG',{hour:'2-digit',minute:'2-digit'}); }
 function esc(t) { return t.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/\n/g,'<br>'); }
+
+if ('serviceWorker' in navigator) {
+  navigator.serviceWorker.register('./sw.js').catch(e => console.log('SW:', e));
+}
 </script>
 </body>
 </html>
