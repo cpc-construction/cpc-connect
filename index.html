@@ -292,7 +292,7 @@ html, body { height: 100%; background: var(--cream); font-family: -apple-system,
         </div>
         <div class="apps-grid" id="apps-grid"><div class="loading-text" style="grid-column:1/-1">Loading...</div></div>
         <div class="drag-hint"><i class="ti ti-drag-drop"></i> Hold &amp; drag to rearrange</div>
-        <div class="section-head"><div class="section-title">Announcements</div></div>
+        <div class="section-head"><div class="section-title" id="announce-title">Announcements</div></div>
         <div id="home-news"><div class="loading-text">Loading...</div></div>
       </div>
     </div>
@@ -331,15 +331,15 @@ html, body { height: 100%; background: var(--cream); font-family: -apple-system,
       <div class="pad">
         <div class="admin-section">
           <div class="admin-section-head">
-            <div class="admin-section-title">App Tiles</div>
-            <button class="add-btn" onclick="openModal('modal-addapp')"><i class="ti ti-plus"></i> Add App</button>
+            <div class="admin-section-title" id="admin-tiles-title">App Tiles</div>
+            <button class="add-btn" id="add-app-btn" onclick="openModal('modal-addapp')"><i class="ti ti-plus"></i> Add App</button>
           </div>
           <div id="admin-apps-list"><div class="loading-text">Loading...</div></div>
         </div>
         <div class="admin-section">
           <div class="admin-section-head">
-            <div class="admin-section-title">Announcements</div>
-            <button class="add-btn" onclick="openModal('modal-announce')"><i class="ti ti-plus"></i> Post</button>
+            <div class="admin-section-title" id="admin-announce-title">Announcements</div>
+            <button class="add-btn" id="post-btn" onclick="openModal('modal-announce')"><i class="ti ti-plus"></i> Post</button>
           </div>
           <div id="admin-announce-list"><div class="loading-text">Loading...</div></div>
         </div>
@@ -393,10 +393,10 @@ html, body { height: 100%; background: var(--cream); font-family: -apple-system,
 <!-- ADD APP MODAL -->
 <div class="modal-overlay" id="modal-addapp">
   <div class="modal">
-    <div class="modal-title">Add App Tile</div>
-    <div class="modal-field"><label>App Name</label><input type="text" id="app-name-in" placeholder="e.g. Vehicle Dashboard"/></div>
-    <div class="modal-field"><label>URL (paste here)</label><input type="url" id="app-url-in" placeholder="https://yourapp.github.io"/></div>
-    <div class="modal-field"><label>Icon</label>
+    <div class="modal-title" id="add-app-modal-title">Add App Tile</div>
+    <div class="modal-field"><label id="label-app-name">App Name</label><input type="text" id="app-name-in" placeholder="e.g. Vehicle Dashboard"/></div>
+    <div class="modal-field"><label id="label-app-url">URL (paste here)</label><input type="url" id="app-url-in" placeholder="https://yourapp.github.io"/></div>
+    <div class="modal-field"><label id="label-app-icon">Icon</label>
       <select id="app-icon-in">
         <option value="ti-truck">Vehicle / Truck</option>
         <option value="ti-shield-exclamation">Safety Tracker</option>
@@ -412,7 +412,7 @@ html, body { height: 100%; background: var(--cream); font-family: -apple-system,
         <option value="ti-apps">App</option>
       </select>
     </div>
-    <div class="modal-field"><label>Color</label>
+    <div class="modal-field"><label id="label-app-color">Color</label>
       <select id="app-color-in">
         <option value="#185FA5">Blue</option>
         <option value="#4a3728">Brown</option>
@@ -425,8 +425,8 @@ html, body { height: 100%; background: var(--cream); font-family: -apple-system,
       </select>
     </div>
     <div class="modal-btns">
-      <button class="modal-cancel" onclick="closeModal('modal-addapp')">Cancel</button>
-      <button class="modal-save" onclick="saveApp()">Add Tile</button>
+      <button class="modal-cancel" id="cancel-app-btn" onclick="closeModal('modal-addapp')">Cancel</button>
+      <button class="modal-save" id="save-app-btn" onclick="saveApp()">Add Tile</button>
     </div>
   </div>
 </div>
@@ -434,16 +434,16 @@ html, body { height: 100%; background: var(--cream); font-family: -apple-system,
 <!-- ANNOUNCE MODAL -->
 <div class="modal-overlay" id="modal-announce">
   <div class="modal">
-    <div class="modal-title">Post Announcement</div>
-    <div class="modal-field"><label>Title</label><input type="text" id="ann-title-in" placeholder="Announcement title"/></div>
-    <div class="modal-field"><label>Body (optional)</label><textarea id="ann-body-in" placeholder="More details..."></textarea></div>
-    <div class="modal-field"><label>Category</label>
+    <div class="modal-title" id="post-announce-title">Post Announcement</div>
+    <div class="modal-field"><label id="label-ann-title">Title</label><input type="text" id="ann-title-in" placeholder="Announcement title"/></div>
+    <div class="modal-field"><label id="label-ann-body">Body (optional)</label><textarea id="ann-body-in" placeholder="More details..."></textarea></div>
+    <div class="modal-field"><label id="label-ann-cat">Category</label>
       <select id="ann-cat-in">
         <option>General</option><option>Safety</option><option>Operations</option><option>HR</option><option>Urgent</option>
       </select>
     </div>
     <div class="modal-field">
-      <label>Attachment (optional)</label>
+      <label id="label-ann-attach">Attachment (optional)</label>
       <div style="display:flex;gap:8px">
         <button type="button" class="add-btn" style="flex:1;justify-content:center" onclick="document.getElementById('ann-file').click()"><i class="ti ti-paperclip"></i> File</button>
         <button type="button" class="add-btn" style="flex:1;justify-content:center" onclick="document.getElementById('ann-camera').click()"><i class="ti ti-camera"></i> Camera</button>
@@ -453,8 +453,8 @@ html, body { height: 100%; background: var(--cream); font-family: -apple-system,
       <div id="ann-attach-preview" style="margin-top:8px;font-size:12px;color:var(--text2)"></div>
     </div>
     <div class="modal-btns">
-      <button class="modal-cancel" onclick="closeModal('modal-announce');annAttachFile=null;document.getElementById('ann-attach-preview').textContent=''">Cancel</button>
-      <button class="modal-save" onclick="saveAnnouncement()">Post</button>
+      <button class="modal-cancel" id="cancel-ann-btn" onclick="closeModal('modal-announce');annAttachFile=null;document.getElementById('ann-attach-preview').textContent=''">Cancel</button>
+      <button class="modal-save" id="save-ann-btn" onclick="saveAnnouncement()">Post</button>
     </div>
   </div>
 </div>
@@ -612,6 +612,74 @@ function applyLang() {
     if (el.textContent === 'Change Password' || el.textContent === '修改密码') el.textContent = t('changePassword');
     if (el.textContent === 'Logout' || el.textContent === '退出登录') el.textContent = t('logout');
     if (el.textContent === 'Admin Panel' || el.textContent === '管理员面板') el.textContent = t('adminPanel');
+  });
+
+  // Home page
+  const announceTitle = document.getElementById('announce-title');
+  if (announceTitle) announceTitle.textContent = t('announcements');
+
+  // Admin panel
+  const adminTilesTitle = document.getElementById('admin-tiles-title');
+  if (adminTilesTitle) adminTilesTitle.textContent = t('appTiles');
+  const addAppBtn = document.getElementById('add-app-btn');
+  if (addAppBtn) addAppBtn.innerHTML = '<i class="ti ti-plus"></i> ' + t('addApp');
+  const adminAnnTitle = document.getElementById('admin-announce-title');
+  if (adminAnnTitle) adminAnnTitle.textContent = t('announcements');
+  const postBtn = document.getElementById('post-btn');
+  if (postBtn) postBtn.innerHTML = '<i class="ti ti-plus"></i> ' + t('postBtn');
+
+  // Add App modal
+  const addAppModalTitle = document.getElementById('add-app-modal-title');
+  if (addAppModalTitle) addAppModalTitle.textContent = t('addAppTitle');
+  const labelAppName = document.getElementById('label-app-name');
+  if (labelAppName) labelAppName.textContent = t('appName');
+  const labelAppUrl = document.getElementById('label-app-url');
+  if (labelAppUrl) labelAppUrl.textContent = t('appUrl');
+  const labelAppIcon = document.getElementById('label-app-icon');
+  if (labelAppIcon) labelAppIcon.textContent = t('icon');
+  const labelAppColor = document.getElementById('label-app-color');
+  if (labelAppColor) labelAppColor.textContent = t('color');
+  const cancelAppBtn = document.getElementById('cancel-app-btn');
+  if (cancelAppBtn) cancelAppBtn.textContent = t('cancel');
+  const saveAppBtn = document.getElementById('save-app-btn');
+  if (saveAppBtn) saveAppBtn.textContent = t('addApp');
+
+  // Announcement modal
+  const postAnnTitle = document.getElementById('post-announce-title');
+  if (postAnnTitle) postAnnTitle.textContent = t('postAnnounce');
+  const labelAnnTitle = document.getElementById('label-ann-title');
+  if (labelAnnTitle) labelAnnTitle.textContent = t('announceTitle');
+  const labelAnnBody = document.getElementById('label-ann-body');
+  if (labelAnnBody) labelAnnBody.textContent = t('announceBody');
+  const labelAnnCat = document.getElementById('label-ann-cat');
+  if (labelAnnCat) labelAnnCat.textContent = t('category');
+  const labelAnnAttach = document.getElementById('label-ann-attach');
+  if (labelAnnAttach) labelAnnAttach.textContent = t('attachment');
+  const cancelAnnBtn = document.getElementById('cancel-ann-btn');
+  if (cancelAnnBtn) cancelAnnBtn.textContent = t('cancel');
+  const saveAnnBtn = document.getElementById('save-ann-btn');
+  if (saveAnnBtn) saveAnnBtn.textContent = t('postBtn');
+
+  // File/Camera buttons in announcement modal
+  const annFileBtns = document.querySelectorAll('#modal-announce .add-btn');
+  if (annFileBtns[0]) annFileBtns[0].innerHTML = '<i class="ti ti-paperclip"></i> ' + t('file');
+  if (annFileBtns[1]) annFileBtns[1].innerHTML = '<i class="ti ti-camera"></i> ' + t('camera');
+
+  // News page section titles
+  const companyAnnEl = document.querySelector('#news-list .section-title:first-of-type');
+  if (companyAnnEl) companyAnnEl.textContent = t('companyAnnounce');
+  const industryEl = document.querySelector('#news-list .section-title:last-of-type');
+  if (industryEl) industryEl.textContent = t('industryNews');
+
+  // No announcements text in admin
+  const noAnnEls = document.querySelectorAll('.loading-text');
+  noAnnEls.forEach(el => {
+    if (el.textContent === 'No announcements yet.' || el.textContent === '暂无公告。') {
+      el.textContent = lang === 'zh' ? '暂无公告。' : 'No announcements yet.';
+    }
+    if (el.textContent === 'No apps yet.' || el.textContent === '暂无应用。') {
+      el.textContent = lang === 'zh' ? '暂无应用。' : 'No apps yet.';
+    }
   });
 
   // Delete message sheet
@@ -810,7 +878,7 @@ function closeViewer() { document.getElementById('app-viewer').classList.remove(
 async function loadHomeNews() {
   const { data } = await sb.from('cpc_announcements').select('*').order('created_at',{ascending:false}).limit(3);
   const el = document.getElementById('home-news');
-  if (!data||!data.length) { el.innerHTML='<div class="loading-text">No announcements yet.</div>'; return; }
+  if (!data||!data.length) { el.innerHTML='<div class="loading-text">' + (lang==="zh"?"暂无公告。":"No announcements yet.") + '</div>'; return; }
   const colors = {Safety:'#993C1D',Urgent:'#c0392b',HR:'#534AB7',Operations:'#185FA5',General:'#4a3728'};
   el.innerHTML = data.map(a=>`<div class="news-item"><div class="news-dot" style="background:${colors[a.category]||'#4a3728'}"></div><div><div class="news-title">${a.title}</div><div class="news-meta">${a.category} · ${timeAgo(a.created_at)}</div></div></div>`).join('');
 }
