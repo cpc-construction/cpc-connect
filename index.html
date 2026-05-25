@@ -237,22 +237,23 @@ html, body { height: 100%; background: var(--cream); font-family: -apple-system,
   <div class="auth-sub">CPC Construction Pte Ltd</div>
   <div class="auth-card">
     <div class="auth-tabs">
-      <div class="auth-tab active" onclick="switchTab('login')">Login</div>
-      <div class="auth-tab" onclick="switchTab('register')">Register</div>
+      <div class="auth-tab active" id="tab-login" onclick="switchTab('login')">Login</div>
+      <div class="auth-tab" id="tab-register" onclick="switchTab('register')">Register</div>
     </div>
     <div id="login-form">
-      <div class="auth-field"><label>Email</label><input type="email" id="login-email" placeholder="your@email.com"/></div>
-      <div class="auth-field"><label>Password</label><input type="password" id="login-pass" placeholder="Password"/></div>
-      <button class="auth-btn" onclick="doLogin()">Login</button>
+      <div class="auth-field"><label id="label-email-l">Email</label><input type="email" id="login-email" placeholder="your@email.com"/></div>
+      <div class="auth-field"><label id="label-pass-l">Password</label><input type="password" id="login-pass" placeholder="Password"/></div>
+      <button class="auth-btn" id="login-btn" onclick="doLogin()">Login</button>
     </div>
     <div id="register-form" class="hidden">
-      <div class="auth-field"><label>Display Name</label><input type="text" id="reg-name" placeholder="Your name"/></div>
-      <div class="auth-field"><label>Email</label><input type="email" id="reg-email" placeholder="your@email.com"/></div>
-      <div class="auth-field"><label>Password</label><input type="password" id="reg-pass" placeholder="Min 6 characters"/></div>
-      <button class="auth-btn" onclick="doRegister()">Register</button>
+      <div class="auth-field"><label id="label-name-r">Display Name</label><input type="text" id="reg-name" placeholder="Your name"/></div>
+      <div class="auth-field"><label id="label-email-r">Email</label><input type="email" id="reg-email" placeholder="your@email.com"/></div>
+      <div class="auth-field"><label id="label-pass-r">Password</label><input type="password" id="reg-pass" placeholder="Min 6 characters"/></div>
+      <button class="auth-btn" id="register-btn" onclick="doRegister()">Register</button>
     </div>
     <div class="auth-msg" id="auth-msg"></div>
   </div>
+  <button onclick="toggleLang()" id="auth-lang-btn" style="margin-top:16px;background:rgba(255,255,255,0.15);border:1px solid rgba(255,255,255,0.3);color:#fff;padding:6px 18px;border-radius:20px;font-size:13px;cursor:pointer">中文</button>
 </div>
 
 <!-- MAIN APP -->
@@ -264,6 +265,7 @@ html, body { height: 100%; background: var(--cream); font-family: -apple-system,
         <span class="topbar-name">CPC Connect</span>
       </div>
       <div class="topbar-icons">
+        <button onclick="toggleLang()" id="app-lang-btn" style="background:rgba(255,255,255,0.12);border:1px solid rgba(255,255,255,0.2);color:rgba(255,255,255,0.9);padding:4px 12px;border-radius:16px;font-size:12px;cursor:pointer;font-weight:500">中文</button>
         <button class="icon-btn" onclick="showPage('chat')">
           <i class="ti ti-message-circle"></i>
           <div class="notif-dot" id="chat-dot"></div>
@@ -475,6 +477,160 @@ html, body { height: 100%; background: var(--cream); font-family: -apple-system,
 <script>
 const sb = supabase.createClient(SUPA_URL, SUPA_KEY);
 
+// ===== LANGUAGE =====
+const T = {
+  en: {
+    login: 'Login', register: 'Register', email: 'Email', password: 'Password',
+    displayName: 'Display Name', loginBtn: 'Login', registerBtn: 'Register',
+    loggingIn: 'Logging in...', registering: 'Registering...',
+    home: 'Home', chat: 'Chat', news: 'News', profile: 'Profile',
+    searchApps: 'Search apps...', myApps: 'My Apps', manage: 'Manage',
+    announcements: 'Announcements', dragHint: 'Hold & drag to rearrange',
+    companyChat: 'Company Chat', companyWide: 'Company-wide group chat',
+    typeMessage: 'Type a message...', noMessages: 'No messages yet. Say hello! 👋',
+    attachNotice: '⚠️ Attachments auto-deleted after 7 days. Save important files to your device.',
+    companyAnnounce: 'Company Announcements', industryNews: 'Industry News',
+    noAnnounce: 'No announcements yet.', loadingIndustry: 'Loading industry news...',
+    adminPanel: 'Admin Panel', changePassword: 'Change Password', logout: 'Logout',
+    appTiles: 'App Tiles', addApp: 'Add App', addAppTitle: 'Add App Tile',
+    appName: 'App Name', appUrl: 'URL (paste here)', icon: 'Icon', color: 'Color',
+    postAnnounce: 'Post Announcement', postBtn: 'Post', announceTitle: 'Title',
+    announceBody: 'Body (optional)', category: 'Category', attachment: 'Attachment (optional)',
+    file: 'File', camera: 'Camera', cancel: 'Cancel', save: 'Save', remove: 'Remove',
+    deleteMsg: 'Delete Message?', deleteForAll: 'Delete for Everyone', deleteConfirm: 'This message will be deleted for everyone.',
+    currentPw: 'Current Password', newPw: 'New Password', confirmPw: 'Confirm New Password',
+    changePwTitle: 'Change Password', you: 'You', admin: 'Admin', user: 'User',
+    tapToRead: 'Tap to read', tapToVisit: 'Tap to visit website',
+    noAppsYet: 'No apps yet. Admin can add apps.', loading: 'Loading...',
+    uploadingPhoto: 'Uploading photo...', uploadingFile: 'Uploading ',
+  },
+  zh: {
+    login: '登录', register: '注册', email: '电子邮件', password: '密码',
+    displayName: '显示名称', loginBtn: '登录', registerBtn: '注册',
+    loggingIn: '登录中...', registering: '注册中...',
+    home: '主页', chat: '聊天', news: '新闻', profile: '个人',
+    searchApps: '搜索应用...', myApps: '我的应用', manage: '管理',
+    announcements: '公告', dragHint: '长按拖动重新排列',
+    companyChat: '公司聊天', companyWide: '公司群组聊天',
+    typeMessage: '输入消息...', noMessages: '暂无消息，打个招呼吧！👋',
+    attachNotice: '⚠️ 附件将在7天后自动删除，请及时保存重要文件。',
+    companyAnnounce: '公司公告', industryNews: '行业新闻',
+    noAnnounce: '暂无公告。', loadingIndustry: '加载行业新闻中...',
+    adminPanel: '管理员面板', changePassword: '修改密码', logout: '退出登录',
+    appTiles: '应用磁贴', addApp: '添加应用', addAppTitle: '添加应用磁贴',
+    appName: '应用名称', appUrl: 'URL（粘贴到此处）', icon: '图标', color: '颜色',
+    postAnnounce: '发布公告', postBtn: '发布', announceTitle: '标题',
+    announceBody: '内容（可选）', category: '类别', attachment: '附件（可选）',
+    file: '文件', camera: '拍照', cancel: '取消', save: '保存', remove: '删除',
+    deleteMsg: '删除消息？', deleteForAll: '为所有人删除', deleteConfirm: '此消息将对所有人删除。',
+    currentPw: '当前密码', newPw: '新密码', confirmPw: '确认新密码',
+    changePwTitle: '修改密码', you: '你', admin: '管理员', user: '用户',
+    tapToRead: '点击阅读', tapToVisit: '点击访问网站',
+    noAppsYet: '暂无应用，管理员可添加。', loading: '加载中...',
+    uploadingPhoto: '上传照片中...', uploadingFile: '上传文件中 ',
+  }
+};
+
+let lang = localStorage.getItem('cpc_lang') || 'en';
+function t(key) { return T[lang][key] || T.en[key] || key; }
+
+function toggleLang() {
+  lang = lang === 'en' ? 'zh' : 'en';
+  localStorage.setItem('cpc_lang', lang);
+  applyLang();
+}
+
+function applyLang() {
+  const isZh = lang === 'zh';
+  const btnText = isZh ? 'EN' : '中文';
+
+  // Update lang buttons
+  const authBtn = document.getElementById('auth-lang-btn');
+  const appBtn = document.getElementById('app-lang-btn');
+  if (authBtn) authBtn.textContent = btnText;
+  if (appBtn) appBtn.textContent = btnText;
+
+  // Auth screen
+  const tabLogin = document.getElementById('tab-login');
+  const tabReg = document.getElementById('tab-register');
+  if (tabLogin) tabLogin.textContent = t('login');
+  if (tabReg) tabReg.textContent = t('register');
+
+  // Labels
+  const fields = {
+    'label-email-l': t('email'), 'label-pass-l': t('password'),
+    'label-name-r': t('displayName'), 'label-email-r': t('email'), 'label-pass-r': t('password'),
+  };
+  Object.entries(fields).forEach(([id, val]) => { const el = document.getElementById(id); if (el) el.textContent = val; });
+
+  // Bottom nav
+  const navLabels = ['home','chat','news','profile'];
+  navLabels.forEach(n => {
+    const el = document.querySelector(`#nav-${n} span`);
+    if (el) el.textContent = t(n);
+  });
+
+  // Search bar
+  const searchInput = document.querySelector('.search-bar input');
+  if (searchInput) searchInput.placeholder = t('searchApps');
+
+  // Section titles
+  const myAppsEl = document.querySelector('.section-title');
+  if (myAppsEl) myAppsEl.textContent = t('myApps');
+
+  // Manage button
+  const manageBtn = document.getElementById('manage-btn');
+  if (manageBtn) manageBtn.textContent = t('manage');
+
+  // Drag hint
+  const dragEl = document.querySelector('.drag-hint');
+  if (dragEl) dragEl.innerHTML = `<i class="ti ti-drag-drop"></i> ${t('dragHint')}`;
+
+  // Chat header
+  const chatH = document.querySelector('.chat-header h2');
+  const chatP = document.querySelector('.chat-header p');
+  if (chatH) chatH.textContent = t('companyChat');
+  if (chatP) chatP.textContent = t('companyWide');
+
+  // Chat input placeholder
+  const chatInput = document.getElementById('chat-input');
+  if (chatInput) chatInput.placeholder = t('typeMessage');
+
+  // Chat notice
+  const notice = document.querySelector('.chat-notice');
+  if (notice) notice.textContent = t('attachNotice');
+
+  // Profile
+  const pRole = document.getElementById('p-role');
+  if (pRole) pRole.textContent = userRole === 'admin' ? t('admin') : t('user');
+
+  const adminMenuEl = document.getElementById('admin-menu');
+  if (adminMenuEl) adminMenuEl.querySelector('span').textContent = t('adminPanel');
+
+  const profileMenuItems = document.querySelectorAll('.profile-menu-item span');
+  profileMenuItems.forEach(el => {
+    if (el.textContent === 'Change Password' || el.textContent === '修改密码') el.textContent = t('changePassword');
+    if (el.textContent === 'Logout' || el.textContent === '退出登录') el.textContent = t('logout');
+    if (el.textContent === 'Admin Panel' || el.textContent === '管理员面板') el.textContent = t('adminPanel');
+  });
+
+  // Delete message sheet
+  const delTitle = document.querySelector('.msg-delete-title');
+  const delSub = document.querySelector('.msg-delete-sub');
+  const delYes = document.querySelector('.msg-delete-yes');
+  if (delTitle) delTitle.textContent = t('deleteMsg');
+  if (delSub) delSub.textContent = t('deleteConfirm');
+  if (delYes) delYes.textContent = t('deleteForAll');
+
+  // Change password modal
+  const pwTitle = document.querySelector('#modal-changepw .modal-title');
+  if (pwTitle) pwTitle.textContent = t('changePwTitle');
+
+  // Reload pages that have dynamic content
+  if (document.getElementById('page-news').classList.contains('active')) loadNewsPage();
+  if (document.getElementById('page-home').classList.contains('active')) loadHomeNews();
+}
+
 let currentUser = null;
 let userRole = 'user';
 let userName = '';
@@ -510,9 +666,9 @@ async function doLogin() {
   const pass = document.getElementById('login-pass').value;
   if (!email || !pass) { showMsg('Please enter email and password', true); return; }
   const btn = document.querySelector('#login-form .auth-btn');
-  btn.textContent = 'Logging in...'; btn.disabled = true;
+  btn.textContent = t('loggingIn'); btn.disabled = true;
   const { data, error } = await sb.auth.signInWithPassword({ email, password: pass });
-  btn.textContent = 'Login'; btn.disabled = false;
+  btn.textContent = t('loginBtn'); btn.disabled = false;
   if (error) { showMsg(error.message, true); return; }
   currentUser = data.user;
   await loadRole();
@@ -528,9 +684,9 @@ async function doRegister() {
   if (!email) { showMsg('Please enter your email', true); return; }
   if (pass.length < 6) { showMsg('Password must be at least 6 characters', true); return; }
   const btn = document.querySelector('#register-form .auth-btn');
-  btn.textContent = 'Registering...'; btn.disabled = true;
+  btn.textContent = t('registering'); btn.disabled = true;
   const { data, error } = await sb.auth.signUp({ email, password: pass });
-  btn.textContent = 'Register'; btn.disabled = false;
+  btn.textContent = t('registerBtn'); btn.disabled = false;
   if (error) { showMsg(error.message, true); return; }
   if (data.user) {
     await sb.from('cpc_user_roles').insert({ user_id: data.user.id, email, display_name: name, role: 'user' }).then(()=>{}).catch(()=>{});
@@ -556,6 +712,9 @@ async function loadRole() {
     else { await sb.from('cpc_user_roles').insert({ user_id: currentUser.id, email: currentUser.email, display_name: userName, role: 'user' }).then(()=>{}).catch(()=>{}); }
   } catch(e) { console.log('Role error:', e); }
 }
+
+// Apply saved language on load
+applyLang();
 
 (async () => {
   const timer = setTimeout(async () => {
@@ -590,6 +749,7 @@ function setupApp() {
     document.getElementById('manage-btn').classList.remove('hidden');
     document.getElementById('admin-menu').classList.remove('hidden');
   }
+  applyLang();
 }
 
 function setupProfile() {
