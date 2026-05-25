@@ -147,6 +147,15 @@ html, body { height: 100%; background: var(--cream); font-family: -apple-system,
 .chat-notice { text-align: center; color: var(--text3); font-size: 11px; padding: 8px 16px; background: rgba(181,150,74,0.08); margin: 8px 14px; border-radius: 8px; }
 .upload-progress { text-align: center; color: var(--text3); font-size: 12px; padding: 6px; } @keyframes spin { to { transform: rotate(360deg); } }
 .chat-empty { text-align: center; color: var(--text3); font-size: 13px; padding: 2rem; }
+.msg-delete-btn { display: none; background: #e74c3c; color: #fff; border: none; border-radius: 12px; padding: 4px 10px; font-size: 11px; cursor: pointer; margin-top: 4px; }
+.msg-body:hover .msg-delete-btn { display: inline-block; }
+.msg-delete-confirm { position: fixed; inset: 0; background: rgba(0,0,0,0.5); z-index: 300; display: flex; align-items: flex-end; }
+.msg-delete-sheet { background: var(--surface); border-radius: 20px 20px 0 0; padding: 1.5rem; width: 100%; }
+.msg-delete-title { font-size: 15px; font-weight: 600; margin-bottom: 6px; }
+.msg-delete-sub { font-size: 13px; color: var(--text3); margin-bottom: 1.25rem; }
+.msg-delete-actions { display: flex; flex-direction: column; gap: 10px; }
+.msg-delete-yes { padding: 13px; background: #e74c3c; color: #fff; border: none; border-radius: 10px; font-size: 15px; font-weight: 600; cursor: pointer; }
+.msg-delete-no { padding: 13px; background: var(--surface2); border: 1px solid var(--border); border-radius: 10px; font-size: 15px; cursor: pointer; }
 
 /* NEWS PAGE */
 .announce-card { background: var(--surface); border-radius: var(--radius); border: 1px solid var(--border); padding: 14px; margin-bottom: 10px; }
@@ -736,7 +745,18 @@ function appendMsg(m, scroll=true) {
   
   const msgText = m.message ? `<div class="msg-bubble">${esc(m.message)}</div>` : '';
   const attachWrap = attachHtml ? (m.message ? attachHtml : `<div class="msg-bubble" style="padding:4px;background:transparent;border:none">${attachHtml}</div>`) : '';
-  div.innerHTML = `<div class="msg-avatar" style="background:${col}">${init}</div><div class="msg-body"><div class="msg-name">${mine?'You':m.display_name}</div>${msgText}${attachWrap}<div class="msg-time">${fmtTime(m.created_at)}</div></div>`;
+  const canDelete = mine || userRole === 'admin';
+  const deleteBtn = canDelete ? `<button class="msg-delete-btn" onclick="showDeleteMsg('${m.id}','${m.attachment_url||''}','${m.attachment_type||''}')">🗑 Delete</button>` : '';
+  div.innerHTML = `<div class="msg-avatar" style="background:${col}">${init}</div><div class="msg-body"><div class="msg-name">${mine?'You':m.display_name}</div>${msgText}${attachWrap}<div class="msg-time">${fmtTime(m.created_at)}</div>${deleteBtn}</div>`;
+  
+  // Long press for mobile
+  if (canDelete) {
+    let pressTimer;
+    div.addEventListener('touchstart', () => { pressTimer = setTimeout(() => showDeleteMsg(m.id, m.attachment_url||'', m.attachment_type||''), 600); });
+    div.addEventListener('touchend', () => clearTimeout(pressTimer));
+    div.addEventListener('touchmove', () => clearTimeout(pressTimer));
+  }
+  
   el.appendChild(div);
   if (scroll) el.scrollTop=el.scrollHeight;
 }
@@ -843,6 +863,63 @@ async function doChangePassword() {
   setTimeout(() => { closeModal('modal-changepw'); document.getElementById('pw-msg').textContent = ''; }, 1500);
 }
 
+// ===== DELETE MESSAGE =====
+let deleteMsgId = null;
+let deleteMsgAttachUrl = null;
+let deleteMsgAttachType = null;
+
+function showDeleteMsg(id, attachUrl, attachType) {
+  deleteMsgId = id;
+  deleteMsgAttachUrl = attachUrl;
+  deleteMsgAttachType = attachType;
+  document.getElementById('msg-delete-confirm').classList.remove('hidden');
+}
+
+function cancelDeleteMsg() {
+  deleteMsgId = null;
+  deleteMsgAttachUrl = null;
+  deleteMsgAttachType = null;
+  document.getElementById('msg-delete-confirm').classList.add('hidden');
+}
+
+async function confirmDeleteMsg() {
+  if (!deleteMsgId) return;
+  document.getElementById('msg-delete-confirm').classList.add('hidden');
+
+  try {
+    // Delete attachment from storage if exists
+    if (deleteMsgAttachUrl && deleteMsgAttachUrl !== '') {
+      try {
+        // Extract path from URL
+        const urlParts = deleteMsgAttachUrl.split('/cpc-chat/');
+        if (urlParts.length > 1) {
+          await sb.storage.from('cpc-chat').remove([urlParts[1]]);
+        }
+      } catch(e) { console.log('Storage delete error:', e); }
+    }
+
+    // Delete message from database
+    const { error } = await sb.from('cpc_messages').delete().eq('id', deleteMsgId);
+    if (error) { alert('Delete failed: ' + error.message); return; }
+
+    // Remove message from UI
+    const msgEls = document.querySelectorAll('.msg');
+    msgEls.forEach(el => {
+      if (el.querySelector(`[onclick*="${deleteMsgId}"]`)) el.remove();
+    });
+
+    // Reload messages to refresh UI cleanly
+    loadMessages();
+
+  } catch(e) {
+    alert('Delete failed: ' + e.message);
+  } finally {
+    deleteMsgId = null;
+    deleteMsgAttachUrl = null;
+    deleteMsgAttachType = null;
+  }
+}
+
 // ===== ANNOUNCEMENT ATTACHMENT =====
 let annAttachFile = null;
 
@@ -920,5 +997,17 @@ if ('serviceWorker' in navigator) {
   navigator.serviceWorker.register('./sw.js').catch(e => console.log('SW:', e));
 }
 </script>
+<!-- DELETE MESSAGE CONFIRM -->
+<div class="msg-delete-confirm hidden" id="msg-delete-confirm">
+  <div class="msg-delete-sheet">
+    <div class="msg-delete-title">Delete Message?</div>
+    <div class="msg-delete-sub">This message will be deleted for everyone.</div>
+    <div class="msg-delete-actions">
+      <button class="msg-delete-yes" onclick="confirmDeleteMsg()">Delete for Everyone</button>
+      <button class="msg-delete-no" onclick="cancelDeleteMsg()">Cancel</button>
+    </div>
+  </div>
+</div>
+
 </body>
 </html>
