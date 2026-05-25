@@ -13,6 +13,7 @@
 <script>
 const SUPA_URL = 'https://ihwgejsioutzcmkaaumi.supabase.co';
 const SUPA_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imlod2dlanNpb3V0emNta2FhdW1pIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzU4OTMxMDcsImV4cCI6MjA5MTQ2OTEwN30.951EDcnMQMNzirlMxmxOLi3CmR6suhPNQNqvgvNC9rA';
+const VAPID_PUBLIC = 'BFeK-xQHnnPzuRjUG6iRjhFQgJT5EsbdOeWTNHzgWvVSlaQvghXTRlObztrYoGtvmjU-tYts8bQW3uXKNmmWtlA';
 </script>
 <style>
 :root {
@@ -584,6 +585,7 @@ function setupApp() {
   loadApps();
   loadHomeNews();
   setupChat();
+  setupPushNotifications();
   if (userRole === 'admin') {
     document.getElementById('manage-btn').classList.remove('hidden');
     document.getElementById('admin-menu').classList.remove('hidden');
@@ -766,6 +768,7 @@ async function sendMessage() {
   if (!msg||!currentUser) return;
   input.value='';
   await sb.from('cpc_messages').insert({user_id:currentUser.id,display_name:userName,message:msg});
+  sendPushToAll(userName, msg.length > 60 ? msg.substring(0,60)+'...' : msg);
 }
 function chatKeydown(e) { if(e.key==='Enter'&&!e.shiftKey){e.preventDefault();sendMessage();} }
 function updateBadge() {
@@ -861,6 +864,65 @@ async function doChangePassword() {
   document.getElementById('new-pw-1').value = '';
   document.getElementById('new-pw-2').value = '';
   setTimeout(() => { closeModal('modal-changepw'); document.getElementById('pw-msg').textContent = ''; }, 1500);
+}
+
+// ===== PUSH NOTIFICATIONS =====
+async function setupPushNotifications() {
+  if (!('serviceWorker' in navigator) || !('PushManager' in window)) return;
+  
+  try {
+    const reg = await navigator.serviceWorker.ready;
+    
+    // Check if already subscribed
+    const existing = await reg.pushManager.getSubscription();
+    if (existing) { await savePushSubscription(existing); return; }
+    
+    // Ask permission
+    const permission = await Notification.requestPermission();
+    if (permission !== 'granted') return;
+    
+    // Subscribe
+    const subscription = await reg.pushManager.subscribe({
+      userVisibleOnly: true,
+      applicationServerKey: urlB64ToUint8Array(VAPID_PUBLIC)
+    });
+    
+    await savePushSubscription(subscription);
+  } catch(e) {
+    console.log('Push setup error:', e);
+  }
+}
+
+async function savePushSubscription(subscription) {
+  if (!currentUser) return;
+  await sb.from('cpc_push_subscriptions').upsert({
+    user_id: currentUser.id,
+    subscription: subscription.toJSON()
+  }, { onConflict: 'user_id' });
+}
+
+function urlB64ToUint8Array(b64) {
+  const pad = '='.repeat((4 - b64.length % 4) % 4);
+  const raw = atob((b64 + pad).replace(/-/g, '+').replace(/_/g, '/'));
+  const arr = new Uint8Array(raw.length);
+  for (let i = 0; i < raw.length; i++) arr[i] = raw.charCodeAt(i);
+  return arr;
+}
+
+async function sendPushToAll(title, body) {
+  if (!currentUser) return;
+  try {
+    await fetch(`${SUPA_URL}/functions/v1/send-push`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': `Bearer ${SUPA_KEY}`
+      },
+      body: JSON.stringify({ title, body, sender_id: currentUser.id })
+    });
+  } catch(e) {
+    console.log('Push send error:', e);
+  }
 }
 
 // ===== DELETE MESSAGE =====
