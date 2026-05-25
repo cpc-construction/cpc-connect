@@ -145,7 +145,7 @@ html, body { height: 100%; background: var(--cream); font-family: -apple-system,
 .msg-attachment img { max-width: 200px; border-radius: 10px; display: block; cursor: pointer; }
 .msg-attachment a { display: flex; align-items: center; gap: 6px; background: rgba(0,0,0,0.08); padding: 8px 12px; border-radius: 10px; text-decoration: none; color: inherit; font-size: 13px; }
 .chat-notice { text-align: center; color: var(--text3); font-size: 11px; padding: 8px 16px; background: rgba(181,150,74,0.08); margin: 8px 14px; border-radius: 8px; }
-.upload-progress { text-align: center; color: var(--text3); font-size: 12px; padding: 6px; }
+.upload-progress { text-align: center; color: var(--text3); font-size: 12px; padding: 6px; } @keyframes spin { to { transform: rotate(360deg); } }
 .chat-empty { text-align: center; color: var(--text3); font-size: 13px; padding: 2rem; }
 
 /* NEWS PAGE */
@@ -796,6 +796,62 @@ async function doChangePassword() {
   document.getElementById('new-pw-1').value = '';
   document.getElementById('new-pw-2').value = '';
   setTimeout(() => { closeModal('modal-changepw'); document.getElementById('pw-msg').textContent = ''; }, 1500);
+}
+
+// ===== ATTACHMENTS =====
+async function sendAttachment(input) {
+  if (!input.files || !input.files[0] || !currentUser) return;
+  const file = input.files[0];
+  input.value = '';
+
+  const el = document.getElementById('chat-messages');
+  const prog = document.createElement('div');
+  prog.className = 'upload-progress';
+  prog.textContent = 'Uploading ' + (file.type.startsWith('image/') ? 'photo' : file.name) + '...';
+  el.appendChild(prog);
+  el.scrollTop = el.scrollHeight;
+
+  try {
+    let uploadFile = file;
+    let attachment_type = 'file';
+    if (file.type.startsWith('image/')) {
+      uploadFile = await compressImage(file);
+      attachment_type = 'image';
+    }
+    const ext = file.name.split('.').pop() || 'jpg';
+    const path = currentUser.id + '_' + Date.now() + '.' + ext;
+    const { error: upErr } = await sb.storage.from('cpc-chat').upload(path, uploadFile, { upsert: true });
+    if (upErr) { alert('Upload failed: ' + upErr.message); prog.remove(); return; }
+    const { data: urlData } = sb.storage.from('cpc-chat').getPublicUrl(path);
+    const { error: msgErr } = await sb.from('cpc_messages').insert({
+      user_id: currentUser.id, display_name: userName, message: '',
+      attachment_url: urlData.publicUrl, attachment_type, attachment_name: file.name
+    });
+    if (msgErr) alert('Send failed: ' + msgErr.message);
+  } catch(e) {
+    alert('Error: ' + e.message);
+  } finally {
+    prog.remove();
+  }
+}
+
+async function compressImage(file) {
+  return new Promise(resolve => {
+    const reader = new FileReader();
+    reader.onload = e => {
+      const img = new Image();
+      img.onload = () => {
+        const canvas = document.createElement('canvas');
+        let w = img.width, h = img.height, max = 1200;
+        if (w > max || h > max) { if (w > h) { h = h*max/w; w = max; } else { w = w*max/h; h = max; } }
+        canvas.width = w; canvas.height = h;
+        canvas.getContext('2d').drawImage(img, 0, 0, w, h);
+        canvas.toBlob(blob => resolve(blob || file), 'image/jpeg', 0.75);
+      };
+      img.src = e.target.result;
+    };
+    reader.readAsDataURL(file);
+  });
 }
 
 function timeAgo(ts) {
