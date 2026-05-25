@@ -644,15 +644,60 @@ async function loadHomeNews() {
   el.innerHTML = data.map(a=>`<div class="news-item"><div class="news-dot" style="background:${colors[a.category]||'#4a3728'}"></div><div><div class="news-title">${a.title}</div><div class="news-meta">${a.category} · ${timeAgo(a.created_at)}</div></div></div>`).join('');
 }
 async function loadNewsPage() {
-  const { data } = await sb.from('cpc_announcements').select('*').order('created_at',{ascending:false});
   const el = document.getElementById('news-list');
-  if (!data||!data.length) { el.innerHTML='<div class="loading-text">No announcements yet.</div>'; return; }
+  el.innerHTML = '<div class="loading-text">Loading...</div>';
   const colors = {Safety:'#993C1D',Urgent:'#c0392b',HR:'#534AB7',Operations:'#185FA5',General:'#4a3728'};
-  el.innerHTML = data.map(a=>{
-    const attachHtml = a.attachment_url ? (a.attachment_type==='image' ? `<img src="${a.attachment_url}" style="width:100%;border-radius:10px;margin-top:8px;cursor:pointer" onclick="window.open(this.src,'_blank')"/>` : `<a href="${a.attachment_url}" target="_blank" style="display:flex;align-items:center;gap:6px;background:var(--surface2);padding:8px 12px;border-radius:8px;text-decoration:none;color:var(--text);font-size:13px;margin-top:8px"><i class="ti ti-file"></i>${a.attachment_name||'Download file'}</a>`) : '';
-    return `<div class="announce-card"><div class="announce-cat" style="background:${colors[a.category]||'#4a3728'}22;color:${colors[a.category]||'#4a3728'}">${a.category}</div><div class="announce-title">${a.title}</div>${a.body?`<div class="announce-body">${a.body}</div>`:''}${attachHtml}<div class="announce-meta">Posted by ${a.posted_by} · ${timeAgo(a.created_at)}</div></div>`;
-  }).join('');
+  const { data } = await sb.from('cpc_announcements').select('*').order('created_at',{ascending:false});
+  let html = '<div class="section-head" style="padding:0 0 8px"><div class="section-title">Company Announcements</div></div>';
+  if (!data||!data.length) {
+    html += '<div class="loading-text" style="padding:1rem 0">No announcements yet.</div>';
+  } else {
+    html += data.map(a=>{
+      const att = a.attachment_url ? (a.attachment_type==='image' ?
+        `<img src="${a.attachment_url}" style="width:100%;border-radius:10px;margin-top:8px;cursor:pointer" onclick="window.open(this.src,'_blank')"/>` :
+        `<a href="${a.attachment_url}" target="_blank" style="display:flex;align-items:center;gap:6px;background:var(--surface2);padding:8px 12px;border-radius:8px;text-decoration:none;color:var(--text);font-size:13px;margin-top:8px"><i class="ti ti-file"></i>${a.attachment_name||'File'}</a>`) : '';
+      return `<div class="announce-card"><div class="announce-cat" style="background:${colors[a.category]||'#4a3728'}22;color:${colors[a.category]||'#4a3728'}">${a.category}</div><div class="announce-title">${a.title}</div>${a.body?`<div class="announce-body">${a.body}</div>`:''
+}${att}<div class="announce-meta">Posted by ${a.posted_by} · ${timeAgo(a.created_at)}</div></div>`;
+    }).join('');
+  }
+  html += '<div class="section-head" style="padding:14px 0 8px"><div class="section-title">Industry News</div></div>';
+  html += '<div id="industry-news"><div class="loading-text">Loading industry news...</div></div>';
+  el.innerHTML = html;
+  loadIndustryNews();
 }
+
+async function loadIndustryNews() {
+  const el = document.getElementById('industry-news');
+  if (!el) return;
+  try {
+    const res = await fetch('https://api.rss2json.com/v1/api.json?rss_url=https://www.mom.gov.sg/rss/newsroom&count=5');
+    const d = await res.json();
+    if (d.status==='ok' && d.items && d.items.length) {
+      el.innerHTML = d.items.map(item=>`
+        <div class="announce-card" onclick="window.open('${item.link}','_blank')" style="cursor:pointer">
+          <div class="announce-cat" style="background:rgba(24,95,165,0.1);color:#185FA5">MOM</div>
+          <div class="announce-title">${item.title}</div>
+          <div class="announce-meta">${new Date(item.pubDate).toLocaleDateString('en-SG')} · Tap to read</div>
+        </div>`).join('');
+    } else { loadFallbackNews(el); }
+  } catch(e) { loadFallbackNews(el); }
+}
+
+function loadFallbackNews(el) {
+  const news = [
+    {title:'WSH Council — Workplace Safety & Health Resources', url:'https://www.wshc.sg', source:'WSH Council'},
+    {title:'BCA — Building & Construction Authority News', url:'https://www1.bca.gov.sg/news-publications/news', source:'BCA'},
+    {title:'MOM — Work Safety Alerts & Advisories', url:'https://www.mom.gov.sg/newsroom', source:'MOM'},
+    {title:'SCAL — Singapore Contractors Association', url:'https://www.scal.com.sg', source:'SCAL'},
+  ];
+  el.innerHTML = news.map(n=>`
+    <div class="announce-card" onclick="window.open('${n.url}','_blank')" style="cursor:pointer">
+      <div class="announce-cat" style="background:rgba(24,95,165,0.1);color:#185FA5">${n.source}</div>
+      <div class="announce-title">${n.title}</div>
+      <div class="announce-meta">Tap to visit website</div>
+    </div>`).join('');
+}
+
 
 function setupChat() {
   loadMessages();
@@ -796,6 +841,16 @@ async function doChangePassword() {
   document.getElementById('new-pw-1').value = '';
   document.getElementById('new-pw-2').value = '';
   setTimeout(() => { closeModal('modal-changepw'); document.getElementById('pw-msg').textContent = ''; }, 1500);
+}
+
+// ===== ANNOUNCEMENT ATTACHMENT =====
+let annAttachFile = null;
+
+function annFileSelected(input) {
+  if (!input.files || !input.files[0]) return;
+  annAttachFile = input.files[0];
+  const preview = document.getElementById('ann-attach-preview');
+  if (preview) preview.textContent = '📎 ' + annAttachFile.name;
 }
 
 // ===== ATTACHMENTS =====
