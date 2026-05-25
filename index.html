@@ -297,8 +297,10 @@ html, body { height: 100%; background: var(--cream); font-family: -apple-system,
           <div class="chat-empty">No messages yet. Say hello! 👋</div>
         </div>
         <div class="chat-input-bar">
-          <button class="attach-btn" onclick="document.getElementById('chat-file').click()"><i class="ti ti-paperclip"></i></button>
+          <button class="attach-btn" onclick="document.getElementById('chat-file').click()" title="Attach file"><i class="ti ti-paperclip"></i></button>
+          <button class="attach-btn" onclick="document.getElementById('chat-camera').click()" title="Take photo"><i class="ti ti-camera"></i></button>
           <input type="file" id="chat-file" accept="image/*,.pdf,.doc,.docx,.xls,.xlsx" style="display:none" onchange="sendAttachment(this)"/>
+          <input type="file" id="chat-camera" accept="image/*" capture="environment" style="display:none" onchange="sendAttachment(this)"/>
           <textarea class="chat-input" id="chat-input" placeholder="Type a message..." rows="1" onkeydown="chatKeydown(event)"></textarea>
           <button class="send-btn" onclick="sendMessage()"><i class="ti ti-send"></i></button>
         </div>
@@ -428,8 +430,18 @@ html, body { height: 100%; background: var(--cream); font-family: -apple-system,
         <option>General</option><option>Safety</option><option>Operations</option><option>HR</option><option>Urgent</option>
       </select>
     </div>
+    <div class="modal-field">
+      <label>Attachment (optional)</label>
+      <div style="display:flex;gap:8px">
+        <button type="button" class="add-btn" style="flex:1;justify-content:center" onclick="document.getElementById('ann-file').click()"><i class="ti ti-paperclip"></i> File</button>
+        <button type="button" class="add-btn" style="flex:1;justify-content:center" onclick="document.getElementById('ann-camera').click()"><i class="ti ti-camera"></i> Camera</button>
+      </div>
+      <input type="file" id="ann-file" accept="image/*,.pdf,.doc,.docx,.xls,.xlsx" style="display:none" onchange="annFileSelected(this)"/>
+      <input type="file" id="ann-camera" accept="image/*" capture="environment" style="display:none" onchange="annFileSelected(this)"/>
+      <div id="ann-attach-preview" style="margin-top:8px;font-size:12px;color:var(--text2)"></div>
+    </div>
     <div class="modal-btns">
-      <button class="modal-cancel" onclick="closeModal('modal-announce')">Cancel</button>
+      <button class="modal-cancel" onclick="closeModal('modal-announce');annAttachFile=null;document.getElementById('ann-attach-preview').textContent=''">Cancel</button>
       <button class="modal-save" onclick="saveAnnouncement()">Post</button>
     </div>
   </div>
@@ -636,7 +648,10 @@ async function loadNewsPage() {
   const el = document.getElementById('news-list');
   if (!data||!data.length) { el.innerHTML='<div class="loading-text">No announcements yet.</div>'; return; }
   const colors = {Safety:'#993C1D',Urgent:'#c0392b',HR:'#534AB7',Operations:'#185FA5',General:'#4a3728'};
-  el.innerHTML = data.map(a=>`<div class="announce-card"><div class="announce-cat" style="background:${colors[a.category]||'#4a3728'}22;color:${colors[a.category]||'#4a3728'}">${a.category}</div><div class="announce-title">${a.title}</div>${a.body?`<div class="announce-body">${a.body}</div>`:''}<div class="announce-meta">Posted by ${a.posted_by} · ${timeAgo(a.created_at)}</div></div>`).join('');
+  el.innerHTML = data.map(a=>{
+    const attachHtml = a.attachment_url ? (a.attachment_type==='image' ? `<img src="${a.attachment_url}" style="width:100%;border-radius:10px;margin-top:8px;cursor:pointer" onclick="window.open(this.src,'_blank')"/>` : `<a href="${a.attachment_url}" target="_blank" style="display:flex;align-items:center;gap:6px;background:var(--surface2);padding:8px 12px;border-radius:8px;text-decoration:none;color:var(--text);font-size:13px;margin-top:8px"><i class="ti ti-file"></i>${a.attachment_name||'Download file'}</a>`) : '';
+    return `<div class="announce-card"><div class="announce-cat" style="background:${colors[a.category]||'#4a3728'}22;color:${colors[a.category]||'#4a3728'}">${a.category}</div><div class="announce-title">${a.title}</div>${a.body?`<div class="announce-body">${a.body}</div>`:''}${attachHtml}<div class="announce-meta">Posted by ${a.posted_by} · ${timeAgo(a.created_at)}</div></div>`;
+  }).join('');
 }
 
 function setupChat() {
@@ -675,7 +690,8 @@ function appendMsg(m, scroll=true) {
   }
   
   const msgText = m.message ? `<div class="msg-bubble">${esc(m.message)}</div>` : '';
-  div.innerHTML = `<div class="msg-avatar" style="background:${col}">${init}</div><div class="msg-body"><div class="msg-name">${mine?'You':m.display_name}</div>${msgText}${attachHtml}<div class="msg-time">${fmtTime(m.created_at)}</div></div>`;
+  const attachWrap = attachHtml ? (m.message ? attachHtml : `<div class="msg-bubble" style="padding:4px;background:transparent;border:none">${attachHtml}</div>`) : '';
+  div.innerHTML = `<div class="msg-avatar" style="background:${col}">${init}</div><div class="msg-body"><div class="msg-name">${mine?'You':m.display_name}</div>${msgText}${attachWrap}<div class="msg-time">${fmtTime(m.created_at)}</div></div>`;
   el.appendChild(div);
   if (scroll) el.scrollTop=el.scrollHeight;
 }
@@ -721,10 +737,37 @@ async function saveAnnouncement() {
   const body=document.getElementById('ann-body-in').value.trim();
   const category=document.getElementById('ann-cat-in').value;
   if (!title){alert('Please enter a title');return;}
-  await sb.from('cpc_announcements').insert({title,body,category,posted_by:userName});
+  
+  let attachment_url = null;
+  let attachment_type = null;
+  let attachment_name = null;
+  
+  if (annAttachFile) {
+    try {
+      let uploadFile = annAttachFile;
+      if (annAttachFile.type.startsWith('image/')) {
+        uploadFile = await compressImage(annAttachFile);
+        attachment_type = 'image';
+      } else {
+        attachment_type = 'file';
+      }
+      attachment_name = annAttachFile.name;
+      const ext = annAttachFile.name.split('.').pop();
+      const path = 'announcements/' + Date.now() + '.' + ext;
+      const { error } = await sb.storage.from('cpc-chat').upload(path, uploadFile, { upsert: true });
+      if (!error) {
+        const { data: urlData } = sb.storage.from('cpc-chat').getPublicUrl(path);
+        attachment_url = urlData.publicUrl;
+      }
+    } catch(e) { console.error('Attachment upload failed:', e); }
+  }
+  
+  await sb.from('cpc_announcements').insert({title,body,category,posted_by:userName,attachment_url,attachment_type,attachment_name});
   closeModal('modal-announce');
   document.getElementById('ann-title-in').value='';
   document.getElementById('ann-body-in').value='';
+  document.getElementById('ann-attach-preview').textContent='';
+  annAttachFile = null;
   loadHomeNews();loadAdminData();
 }
 async function deleteAnn(id) { if(!confirm('Delete this announcement?'))return; await sb.from('cpc_announcements').delete().eq('id',id); loadHomeNews();loadAdminData(); }
