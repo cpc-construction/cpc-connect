@@ -72,8 +72,8 @@ html, body { height: 100%; background: var(--cream); font-family: -apple-system,
 .search-bar input::placeholder { color: rgba(255,255,255,0.45); }
 
 /* PAGES */
-.pages { flex: 1; overflow: hidden; position: relative; }
-.page { position: absolute; inset: 0; overflow-y: auto; display: none; padding-bottom: 70px; }
+.pages { flex: 1; overflow: hidden; position: relative; min-height: 0; }
+.page { position: absolute; top: 0; left: 0; right: 0; bottom: 64px; overflow-y: auto; display: none; padding-bottom: 0; }
 .page.active { display: block; }
 
 /* HOME */
@@ -279,7 +279,7 @@ html, body { height: 100%; background: var(--cream); font-family: -apple-system,
     </div>
 
     <!-- CHAT -->
-    <div class="page" id="page-chat" style="padding-bottom:0;overflow:hidden">
+    <div class="page" id="page-chat" style="overflow:hidden;bottom:64px;">
       <div class="chat-wrap">
         <div class="chat-header">
           <h2>Company Chat</h2>
