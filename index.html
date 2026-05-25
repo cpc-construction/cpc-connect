@@ -889,7 +889,7 @@ async function loadNewsPage() {
   const { data } = await sb.from('cpc_announcements').select('*').order('created_at',{ascending:false});
   let html = '<div class="section-head" style="padding:0 0 8px"><div class="section-title">Company Announcements</div></div>';
   if (!data||!data.length) {
-    html += '<div class="loading-text" style="padding:1rem 0">No announcements yet.</div>';
+    html += '<div class="loading-text" style="padding:1rem 0">' + t('noAnnounce') + '</div>';
   } else {
     html += data.map(a=>{
       const att = a.attachment_url ? (a.attachment_type==='image' ?
@@ -899,8 +899,8 @@ async function loadNewsPage() {
 }${att}<div class="announce-meta">Posted by ${a.posted_by} · ${timeAgo(a.created_at)}</div></div>`;
     }).join('');
   }
-  html += '<div class="section-head" style="padding:14px 0 8px"><div class="section-title">Industry News</div></div>';
-  html += '<div id="industry-news"><div class="loading-text">Loading industry news...</div></div>';
+  html += '<div class="section-head" style="padding:14px 0 8px"><div class="section-title">' + t('industryNews') + '</div></div>';
+  html += '<div id="industry-news"><div class="loading-text">' + t('loadingIndustry') + '</div></div>';
   el.innerHTML = html;
   loadIndustryNews();
 }
@@ -923,7 +923,12 @@ async function loadIndustryNews() {
 }
 
 function loadFallbackNews(el) {
-  const news = [
+  const news = lang === 'zh' ? [
+    {title:'WSH理事会 — 工作场所安全与健康资源', url:'https://www.wshc.sg', source:'WSH Council'},
+    {title:'建设局 — 最新新闻与公告', url:'https://www1.bca.gov.sg/news-publications/news', source:'BCA'},
+    {title:'人力部 — 工作场所安全警报与公告', url:'https://www.mom.gov.sg/newsroom', source:'MOM'},
+    {title:'新加坡承包商协会 — 最新资讯', url:'https://www.scal.com.sg', source:'SCAL'},
+  ] : [
     {title:'WSH Council — Workplace Safety & Health Resources', url:'https://www.wshc.sg', source:'WSH Council'},
     {title:'BCA — Building & Construction Authority News', url:'https://www1.bca.gov.sg/news-publications/news', source:'BCA'},
     {title:'MOM — Work Safety Alerts & Advisories', url:'https://www.mom.gov.sg/newsroom', source:'MOM'},
@@ -933,7 +938,7 @@ function loadFallbackNews(el) {
     <div class="announce-card" onclick="window.open('${n.url}','_blank')" style="cursor:pointer">
       <div class="announce-cat" style="background:rgba(24,95,165,0.1);color:#185FA5">${n.source}</div>
       <div class="announce-title">${n.title}</div>
-      <div class="announce-meta">Tap to visit website</div>
+      <div class="announce-meta">${t('tapToVisit')}</div>
     </div>`).join('');
 }
 
