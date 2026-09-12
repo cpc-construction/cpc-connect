@@ -237,23 +237,22 @@ html, body { height: 100%; background: var(--cream); font-family: -apple-system,
   <div class="auth-sub">CPC Construction Pte Ltd</div>
   <div class="auth-card">
     <div class="auth-tabs">
-      <div class="auth-tab active" id="tab-login" onclick="switchTab('login')">Login</div>
-      <div class="auth-tab" id="tab-register" onclick="switchTab('register')">Register</div>
+      <div class="auth-tab active" onclick="switchTab('login')">Login</div>
+      <div class="auth-tab" onclick="switchTab('register')">Register</div>
     </div>
     <div id="login-form">
-      <div class="auth-field"><label id="label-email-l">Email</label><input type="email" id="login-email" placeholder="your@email.com"/></div>
-      <div class="auth-field"><label id="label-pass-l">Password</label><input type="password" id="login-pass" placeholder="Password"/></div>
-      <button class="auth-btn" id="login-btn" onclick="doLogin()">Login</button>
+      <div class="auth-field"><label>Email</label><input type="email" id="login-email" placeholder="your@email.com"/></div>
+      <div class="auth-field"><label>Password</label><input type="password" id="login-pass" placeholder="Password"/></div>
+      <button class="auth-btn" onclick="doLogin()">Login</button>
     </div>
     <div id="register-form" class="hidden">
-      <div class="auth-field"><label id="label-name-r">Display Name</label><input type="text" id="reg-name" placeholder="Your name"/></div>
-      <div class="auth-field"><label id="label-email-r">Email</label><input type="email" id="reg-email" placeholder="your@email.com"/></div>
-      <div class="auth-field"><label id="label-pass-r">Password</label><input type="password" id="reg-pass" placeholder="Min 6 characters"/></div>
-      <button class="auth-btn" id="register-btn" onclick="doRegister()">Register</button>
+      <div class="auth-field"><label>Display Name</label><input type="text" id="reg-name" placeholder="Your name"/></div>
+      <div class="auth-field"><label>Email</label><input type="email" id="reg-email" placeholder="your@email.com"/></div>
+      <div class="auth-field"><label>Password</label><input type="password" id="reg-pass" placeholder="Min 6 characters"/></div>
+      <button class="auth-btn" onclick="doRegister()">Register</button>
     </div>
     <div class="auth-msg" id="auth-msg"></div>
   </div>
-  <button onclick="toggleLang()" id="auth-lang-btn" style="margin-top:16px;background:rgba(255,255,255,0.15);border:1px solid rgba(255,255,255,0.3);color:#fff;padding:6px 18px;border-radius:20px;font-size:13px;cursor:pointer">中文</button>
 </div>
 
 <!-- MAIN APP -->
@@ -265,7 +264,6 @@ html, body { height: 100%; background: var(--cream); font-family: -apple-system,
         <span class="topbar-name">CPC Connect</span>
       </div>
       <div class="topbar-icons">
-        <button onclick="toggleLang()" id="app-lang-btn" style="background:rgba(255,255,255,0.12);border:1px solid rgba(255,255,255,0.2);color:rgba(255,255,255,0.9);padding:4px 12px;border-radius:16px;font-size:12px;cursor:pointer;font-weight:500">中文</button>
         <button class="icon-btn" onclick="showPage('chat')">
           <i class="ti ti-message-circle"></i>
           <div class="notif-dot" id="chat-dot"></div>
@@ -292,7 +290,7 @@ html, body { height: 100%; background: var(--cream); font-family: -apple-system,
         </div>
         <div class="apps-grid" id="apps-grid"><div class="loading-text" style="grid-column:1/-1">Loading...</div></div>
         <div class="drag-hint"><i class="ti ti-drag-drop"></i> Hold &amp; drag to rearrange</div>
-        <div class="section-head"><div class="section-title" id="announce-title">Announcements</div></div>
+        <div class="section-head"><div class="section-title">Announcements</div></div>
         <div id="home-news"><div class="loading-text">Loading...</div></div>
       </div>
     </div>
@@ -331,24 +329,17 @@ html, body { height: 100%; background: var(--cream); font-family: -apple-system,
       <div class="pad">
         <div class="admin-section">
           <div class="admin-section-head">
-            <div class="admin-section-title" id="admin-tiles-title">App Tiles</div>
-            <button class="add-btn" id="add-app-btn" onclick="openModal('modal-addapp')"><i class="ti ti-plus"></i> Add App</button>
+            <div class="admin-section-title">App Tiles</div>
+            <button class="add-btn" onclick="openModal('modal-addapp')"><i class="ti ti-plus"></i> Add App</button>
           </div>
           <div id="admin-apps-list"><div class="loading-text">Loading...</div></div>
         </div>
         <div class="admin-section">
           <div class="admin-section-head">
-            <div class="admin-section-title" id="admin-announce-title">Announcements</div>
-            <button class="add-btn" id="post-btn" onclick="openModal('modal-announce')"><i class="ti ti-plus"></i> Post</button>
+            <div class="admin-section-title">Announcements</div>
+            <button class="add-btn" onclick="openModal('modal-announce')"><i class="ti ti-plus"></i> Post</button>
           </div>
           <div id="admin-announce-list"><div class="loading-text">Loading...</div></div>
-        </div>
-        <div class="admin-section">
-          <div class="admin-section-head">
-            <div class="admin-section-title" id="admin-news-title">Industry News Links</div>
-            <button class="add-btn" id="add-news-btn" onclick="openModal('modal-addnews')"><i class="ti ti-plus"></i> Add</button>
-          </div>
-          <div id="admin-news-list"><div class="loading-text">Loading...</div></div>
         </div>
       </div>
     </div>
@@ -400,10 +391,10 @@ html, body { height: 100%; background: var(--cream); font-family: -apple-system,
 <!-- ADD APP MODAL -->
 <div class="modal-overlay" id="modal-addapp">
   <div class="modal">
-    <div class="modal-title" id="add-app-modal-title">Add App Tile</div>
-    <div class="modal-field"><label id="label-app-name">App Name</label><input type="text" id="app-name-in" placeholder="e.g. Vehicle Dashboard"/></div>
-    <div class="modal-field"><label id="label-app-url">URL (paste here)</label><input type="url" id="app-url-in" placeholder="https://yourapp.github.io"/></div>
-    <div class="modal-field"><label id="label-app-icon">Icon</label>
+    <div class="modal-title">Add App Tile</div>
+    <div class="modal-field"><label>App Name</label><input type="text" id="app-name-in" placeholder="e.g. Vehicle Dashboard"/></div>
+    <div class="modal-field"><label>URL (paste here)</label><input type="url" id="app-url-in" placeholder="https://yourapp.github.io"/></div>
+    <div class="modal-field"><label>Icon</label>
       <select id="app-icon-in">
         <option value="ti-truck">Vehicle / Truck</option>
         <option value="ti-shield-exclamation">Safety Tracker</option>
@@ -419,7 +410,7 @@ html, body { height: 100%; background: var(--cream); font-family: -apple-system,
         <option value="ti-apps">App</option>
       </select>
     </div>
-    <div class="modal-field"><label id="label-app-color">Color</label>
+    <div class="modal-field"><label>Color</label>
       <select id="app-color-in">
         <option value="#185FA5">Blue</option>
         <option value="#4a3728">Brown</option>
@@ -432,8 +423,8 @@ html, body { height: 100%; background: var(--cream); font-family: -apple-system,
       </select>
     </div>
     <div class="modal-btns">
-      <button class="modal-cancel" id="cancel-app-btn" onclick="closeModal('modal-addapp')">Cancel</button>
-      <button class="modal-save" id="save-app-btn" onclick="saveApp()">Add Tile</button>
+      <button class="modal-cancel" onclick="closeModal('modal-addapp')">Cancel</button>
+      <button class="modal-save" onclick="saveApp()">Add Tile</button>
     </div>
   </div>
 </div>
@@ -441,16 +432,16 @@ html, body { height: 100%; background: var(--cream); font-family: -apple-system,
 <!-- ANNOUNCE MODAL -->
 <div class="modal-overlay" id="modal-announce">
   <div class="modal">
-    <div class="modal-title" id="post-announce-title">Post Announcement</div>
-    <div class="modal-field"><label id="label-ann-title">Title</label><input type="text" id="ann-title-in" placeholder="Announcement title"/></div>
-    <div class="modal-field"><label id="label-ann-body">Body (optional)</label><textarea id="ann-body-in" placeholder="More details..."></textarea></div>
-    <div class="modal-field"><label id="label-ann-cat">Category</label>
+    <div class="modal-title">Post Announcement</div>
+    <div class="modal-field"><label>Title</label><input type="text" id="ann-title-in" placeholder="Announcement title"/></div>
+    <div class="modal-field"><label>Body (optional)</label><textarea id="ann-body-in" placeholder="More details..."></textarea></div>
+    <div class="modal-field"><label>Category</label>
       <select id="ann-cat-in">
         <option>General</option><option>Safety</option><option>Operations</option><option>HR</option><option>Urgent</option>
       </select>
     </div>
     <div class="modal-field">
-      <label id="label-ann-attach">Attachment (optional)</label>
+      <label>Attachment (optional)</label>
       <div style="display:flex;gap:8px">
         <button type="button" class="add-btn" style="flex:1;justify-content:center" onclick="document.getElementById('ann-file').click()"><i class="ti ti-paperclip"></i> File</button>
         <button type="button" class="add-btn" style="flex:1;justify-content:center" onclick="document.getElementById('ann-camera').click()"><i class="ti ti-camera"></i> Camera</button>
@@ -460,23 +451,8 @@ html, body { height: 100%; background: var(--cream); font-family: -apple-system,
       <div id="ann-attach-preview" style="margin-top:8px;font-size:12px;color:var(--text2)"></div>
     </div>
     <div class="modal-btns">
-      <button class="modal-cancel" id="cancel-ann-btn" onclick="closeModal('modal-announce');annAttachFile=null;document.getElementById('ann-attach-preview').textContent=''">Cancel</button>
-      <button class="modal-save" id="save-ann-btn" onclick="saveAnnouncement()">Post</button>
-    </div>
-  </div>
-</div>
-
-<!-- ADD NEWS LINK MODAL -->
-<div class="modal-overlay" id="modal-addnews">
-  <div class="modal">
-    <div class="modal-title" id="add-news-modal-title">Add News Link</div>
-    <div class="modal-field"><label id="label-news-name">Name (English)</label><input type="text" id="news-name-in" placeholder="e.g. BCA — Latest News"/></div>
-    <div class="modal-field"><label id="label-news-name-zh">名称 (中文)</label><input type="text" id="news-name-zh-in" placeholder="例如：建设局 — 最新新闻"/></div>
-    <div class="modal-field"><label id="label-news-url">URL (paste here)</label><input type="url" id="news-url-in" placeholder="https://www.bca.gov.sg/news"/></div>
-    <div class="modal-field"><label id="label-news-source">Source Label</label><input type="text" id="news-source-in" placeholder="e.g. BCA"/></div>
-    <div class="modal-btns">
-      <button class="modal-cancel" id="cancel-news-btn" onclick="closeModal('modal-addnews')">Cancel</button>
-      <button class="modal-save" id="save-news-btn" onclick="saveNewsLink()">Add</button>
+      <button class="modal-cancel" onclick="closeModal('modal-announce');annAttachFile=null;document.getElementById('ann-attach-preview').textContent=''">Cancel</button>
+      <button class="modal-save" onclick="saveAnnouncement()">Post</button>
     </div>
   </div>
 </div>
@@ -498,242 +474,6 @@ html, body { height: 100%; background: var(--cream); font-family: -apple-system,
 
 <script>
 const sb = supabase.createClient(SUPA_URL, SUPA_KEY);
-
-// ===== LANGUAGE =====
-const T = {
-  en: {
-    login: 'Login', register: 'Register', email: 'Email', password: 'Password',
-    displayName: 'Display Name', loginBtn: 'Login', registerBtn: 'Register',
-    loggingIn: 'Logging in...', registering: 'Registering...',
-    home: 'Home', chat: 'Chat', news: 'News', profile: 'Profile',
-    searchApps: 'Search apps...', myApps: 'My Apps', manage: 'Manage',
-    announcements: 'Announcements', dragHint: 'Hold & drag to rearrange',
-    companyChat: 'Company Chat', companyWide: 'Company-wide group chat',
-    typeMessage: 'Type a message...', noMessages: 'No messages yet. Say hello! 👋',
-    attachNotice: '⚠️ Attachments auto-deleted after 7 days. Save important files to your device.',
-    companyAnnounce: 'Company Announcements', industryNews: 'Industry News',
-    noAnnounce: 'No announcements yet.', loadingIndustry: 'Loading industry news...',
-    adminPanel: 'Admin Panel', changePassword: 'Change Password', logout: 'Logout',
-    appTiles: 'App Tiles', addApp: 'Add App', addAppTitle: 'Add App Tile',
-    appName: 'App Name', appUrl: 'URL (paste here)', icon: 'Icon', color: 'Color',
-    postAnnounce: 'Post Announcement', postBtn: 'Post', announceTitle: 'Title',
-    announceBody: 'Body (optional)', category: 'Category', attachment: 'Attachment (optional)',
-    file: 'File', camera: 'Camera', cancel: 'Cancel', save: 'Save', remove: 'Remove',
-    deleteMsg: 'Delete Message?', deleteForAll: 'Delete for Everyone', deleteConfirm: 'This message will be deleted for everyone.',
-    currentPw: 'Current Password', newPw: 'New Password', confirmPw: 'Confirm New Password',
-    changePwTitle: 'Change Password', you: 'You', admin: 'Admin', user: 'User',
-    tapToRead: 'Tap to read', tapToVisit: 'Tap to visit website',
-    industryNewsLinks: 'Industry News Links', addNewsLink: 'Add News Link',
-    noAppsYet: 'No apps yet. Admin can add apps.', loading: 'Loading...',
-    uploadingPhoto: 'Uploading photo...', uploadingFile: 'Uploading ',
-  },
-  zh: {
-    login: '登录', register: '注册', email: '电子邮件', password: '密码',
-    displayName: '显示名称', loginBtn: '登录', registerBtn: '注册',
-    loggingIn: '登录中...', registering: '注册中...',
-    home: '主页', chat: '聊天', news: '新闻', profile: '个人',
-    searchApps: '搜索应用...', myApps: '我的应用', manage: '管理',
-    announcements: '公告', dragHint: '长按拖动重新排列',
-    companyChat: '公司聊天', companyWide: '公司群组聊天',
-    typeMessage: '输入消息...', noMessages: '暂无消息，打个招呼吧！👋',
-    attachNotice: '⚠️ 附件将在7天后自动删除，请及时保存重要文件。',
-    companyAnnounce: '公司公告', industryNews: '行业新闻',
-    noAnnounce: '暂无公告。', loadingIndustry: '加载行业新闻中...',
-    adminPanel: '管理员面板', changePassword: '修改密码', logout: '退出登录',
-    appTiles: '应用磁贴', addApp: '添加应用', addAppTitle: '添加应用磁贴',
-    appName: '应用名称', appUrl: 'URL（粘贴到此处）', icon: '图标', color: '颜色',
-    postAnnounce: '发布公告', postBtn: '发布', announceTitle: '标题',
-    announceBody: '内容（可选）', category: '类别', attachment: '附件（可选）',
-    file: '文件', camera: '拍照', cancel: '取消', save: '保存', remove: '删除',
-    deleteMsg: '删除消息？', deleteForAll: '为所有人删除', deleteConfirm: '此消息将对所有人删除。',
-    currentPw: '当前密码', newPw: '新密码', confirmPw: '确认新密码',
-    changePwTitle: '修改密码', you: '你', admin: '管理员', user: '用户',
-    tapToRead: '点击阅读', tapToVisit: '点击访问网站',
-    industryNewsLinks: '行业新闻链接', addNewsLink: '添加新闻链接',
-    noAppsYet: '暂无应用，管理员可添加。', loading: '加载中...',
-    uploadingPhoto: '上传照片中...', uploadingFile: '上传文件中 ',
-  }
-};
-
-let lang = localStorage.getItem('cpc_lang') || 'en';
-function t(key) { return T[lang][key] || T.en[key] || key; }
-
-function toggleLang() {
-  lang = lang === 'en' ? 'zh' : 'en';
-  localStorage.setItem('cpc_lang', lang);
-  applyLang();
-}
-
-function applyLang() {
-  const isZh = lang === 'zh';
-  const btnText = isZh ? 'EN' : '中文';
-
-  // Update lang buttons
-  const authBtn = document.getElementById('auth-lang-btn');
-  const appBtn = document.getElementById('app-lang-btn');
-  if (authBtn) authBtn.textContent = btnText;
-  if (appBtn) appBtn.textContent = btnText;
-
-  // Auth screen
-  const tabLogin = document.getElementById('tab-login');
-  const tabReg = document.getElementById('tab-register');
-  if (tabLogin) tabLogin.textContent = t('login');
-  if (tabReg) tabReg.textContent = t('register');
-
-  // Labels
-  const fields = {
-    'label-email-l': t('email'), 'label-pass-l': t('password'),
-    'label-name-r': t('displayName'), 'label-email-r': t('email'), 'label-pass-r': t('password'),
-  };
-  Object.entries(fields).forEach(([id, val]) => { const el = document.getElementById(id); if (el) el.textContent = val; });
-
-  // Bottom nav
-  const navLabels = ['home','chat','news','profile'];
-  navLabels.forEach(n => {
-    const el = document.querySelector(`#nav-${n} span`);
-    if (el) el.textContent = t(n);
-  });
-
-  // Search bar
-  const searchInput = document.querySelector('.search-bar input');
-  if (searchInput) searchInput.placeholder = t('searchApps');
-
-  // Section titles
-  const myAppsEl = document.querySelector('.section-title');
-  if (myAppsEl) myAppsEl.textContent = t('myApps');
-
-  // Manage button
-  const manageBtn = document.getElementById('manage-btn');
-  if (manageBtn) manageBtn.textContent = t('manage');
-
-  // Drag hint
-  const dragEl = document.querySelector('.drag-hint');
-  if (dragEl) dragEl.innerHTML = `<i class="ti ti-drag-drop"></i> ${t('dragHint')}`;
-
-  // Chat header
-  const chatH = document.querySelector('.chat-header h2');
-  const chatP = document.querySelector('.chat-header p');
-  if (chatH) chatH.textContent = t('companyChat');
-  if (chatP) chatP.textContent = t('companyWide');
-
-  // Chat input placeholder
-  const chatInput = document.getElementById('chat-input');
-  if (chatInput) chatInput.placeholder = t('typeMessage');
-
-  // Chat notice
-  const notice = document.querySelector('.chat-notice');
-  if (notice) notice.textContent = t('attachNotice');
-
-  // Profile
-  const pRole = document.getElementById('p-role');
-  if (pRole) pRole.textContent = userRole === 'admin' ? t('admin') : t('user');
-
-  const adminMenuEl = document.getElementById('admin-menu');
-  if (adminMenuEl) adminMenuEl.querySelector('span').textContent = t('adminPanel');
-
-  const profileMenuItems = document.querySelectorAll('.profile-menu-item span');
-  profileMenuItems.forEach(el => {
-    if (el.textContent === 'Change Password' || el.textContent === '修改密码') el.textContent = t('changePassword');
-    if (el.textContent === 'Logout' || el.textContent === '退出登录') el.textContent = t('logout');
-    if (el.textContent === 'Admin Panel' || el.textContent === '管理员面板') el.textContent = t('adminPanel');
-  });
-
-  // Home page
-  const announceTitle = document.getElementById('announce-title');
-  if (announceTitle) announceTitle.textContent = t('announcements');
-
-  // Admin panel
-  const adminTilesTitle = document.getElementById('admin-tiles-title');
-  if (adminTilesTitle) adminTilesTitle.textContent = t('appTiles');
-  const addAppBtn = document.getElementById('add-app-btn');
-  if (addAppBtn) addAppBtn.innerHTML = '<i class="ti ti-plus"></i> ' + t('addApp');
-  const adminAnnTitle = document.getElementById('admin-announce-title');
-  if (adminAnnTitle) adminAnnTitle.textContent = t('announcements');
-  const postBtn = document.getElementById('post-btn');
-  if (postBtn) postBtn.innerHTML = '<i class="ti ti-plus"></i> ' + t('postBtn');
-
-  // Add App modal
-  const addAppModalTitle = document.getElementById('add-app-modal-title');
-  if (addAppModalTitle) addAppModalTitle.textContent = t('addAppTitle');
-  const labelAppName = document.getElementById('label-app-name');
-  if (labelAppName) labelAppName.textContent = t('appName');
-  const labelAppUrl = document.getElementById('label-app-url');
-  if (labelAppUrl) labelAppUrl.textContent = t('appUrl');
-  const labelAppIcon = document.getElementById('label-app-icon');
-  if (labelAppIcon) labelAppIcon.textContent = t('icon');
-  const labelAppColor = document.getElementById('label-app-color');
-  if (labelAppColor) labelAppColor.textContent = t('color');
-  const cancelAppBtn = document.getElementById('cancel-app-btn');
-  if (cancelAppBtn) cancelAppBtn.textContent = t('cancel');
-  const saveAppBtn = document.getElementById('save-app-btn');
-  if (saveAppBtn) saveAppBtn.textContent = t('addApp');
-
-  // Announcement modal
-  const postAnnTitle = document.getElementById('post-announce-title');
-  if (postAnnTitle) postAnnTitle.textContent = t('postAnnounce');
-  const labelAnnTitle = document.getElementById('label-ann-title');
-  if (labelAnnTitle) labelAnnTitle.textContent = t('announceTitle');
-  const labelAnnBody = document.getElementById('label-ann-body');
-  if (labelAnnBody) labelAnnBody.textContent = t('announceBody');
-  const labelAnnCat = document.getElementById('label-ann-cat');
-  if (labelAnnCat) labelAnnCat.textContent = t('category');
-  const labelAnnAttach = document.getElementById('label-ann-attach');
-  if (labelAnnAttach) labelAnnAttach.textContent = t('attachment');
-  const cancelAnnBtn = document.getElementById('cancel-ann-btn');
-  if (cancelAnnBtn) cancelAnnBtn.textContent = t('cancel');
-  const saveAnnBtn = document.getElementById('save-ann-btn');
-  if (saveAnnBtn) saveAnnBtn.textContent = t('postBtn');
-
-  // File/Camera buttons in announcement modal
-  const annFileBtns = document.querySelectorAll('#modal-announce .add-btn');
-  if (annFileBtns[0]) annFileBtns[0].innerHTML = '<i class="ti ti-paperclip"></i> ' + t('file');
-  if (annFileBtns[1]) annFileBtns[1].innerHTML = '<i class="ti ti-camera"></i> ' + t('camera');
-
-  // News page section titles
-  const companyAnnEl = document.querySelector('#news-list .section-title:first-of-type');
-  if (companyAnnEl) companyAnnEl.textContent = t('companyAnnounce');
-  const industryEl = document.querySelector('#news-list .section-title:last-of-type');
-  if (industryEl) industryEl.textContent = t('industryNews');
-
-  // No announcements text in admin
-  const noAnnEls = document.querySelectorAll('.loading-text');
-  noAnnEls.forEach(el => {
-    if (el.textContent === 'No announcements yet.' || el.textContent === '暂无公告。') {
-      el.textContent = lang === 'zh' ? '暂无公告。' : 'No announcements yet.';
-    }
-    if (el.textContent === 'No apps yet.' || el.textContent === '暂无应用。') {
-      el.textContent = lang === 'zh' ? '暂无应用。' : 'No apps yet.';
-    }
-  });
-
-  // News links admin section
-  const adminNewsTitle = document.getElementById('admin-news-title');
-  if (adminNewsTitle) adminNewsTitle.textContent = t('industryNewsLinks');
-  const addNewsBtn = document.getElementById('add-news-btn');
-  if (addNewsBtn) addNewsBtn.innerHTML = '<i class="ti ti-plus"></i> ' + (lang==='zh'?'添加':'Add');
-  const addNewsModalTitle = document.getElementById('add-news-modal-title');
-  if (addNewsModalTitle) addNewsModalTitle.textContent = t('addNewsLink');
-  const cancelNewsBtn = document.getElementById('cancel-news-btn');
-  if (cancelNewsBtn) cancelNewsBtn.textContent = t('cancel');
-  const saveNewsBtn = document.getElementById('save-news-btn');
-  if (saveNewsBtn) saveNewsBtn.textContent = lang==='zh'?'添加':'Add';
-
-  // Delete message sheet
-  const delTitle = document.querySelector('.msg-delete-title');
-  const delSub = document.querySelector('.msg-delete-sub');
-  const delYes = document.querySelector('.msg-delete-yes');
-  if (delTitle) delTitle.textContent = t('deleteMsg');
-  if (delSub) delSub.textContent = t('deleteConfirm');
-  if (delYes) delYes.textContent = t('deleteForAll');
-
-  // Change password modal
-  const pwTitle = document.querySelector('#modal-changepw .modal-title');
-  if (pwTitle) pwTitle.textContent = t('changePwTitle');
-
-  // Reload pages that have dynamic content
-  if (document.getElementById('page-news').classList.contains('active')) loadNewsPage();
-  if (document.getElementById('page-home').classList.contains('active')) loadHomeNews();
-}
 
 let currentUser = null;
 let userRole = 'user';
@@ -770,9 +510,9 @@ async function doLogin() {
   const pass = document.getElementById('login-pass').value;
   if (!email || !pass) { showMsg('Please enter email and password', true); return; }
   const btn = document.querySelector('#login-form .auth-btn');
-  btn.textContent = t('loggingIn'); btn.disabled = true;
+  btn.textContent = 'Logging in...'; btn.disabled = true;
   const { data, error } = await sb.auth.signInWithPassword({ email, password: pass });
-  btn.textContent = t('loginBtn'); btn.disabled = false;
+  btn.textContent = 'Login'; btn.disabled = false;
   if (error) { showMsg(error.message, true); return; }
   currentUser = data.user;
   await loadRole();
@@ -788,9 +528,9 @@ async function doRegister() {
   if (!email) { showMsg('Please enter your email', true); return; }
   if (pass.length < 6) { showMsg('Password must be at least 6 characters', true); return; }
   const btn = document.querySelector('#register-form .auth-btn');
-  btn.textContent = t('registering'); btn.disabled = true;
+  btn.textContent = 'Registering...'; btn.disabled = true;
   const { data, error } = await sb.auth.signUp({ email, password: pass });
-  btn.textContent = t('registerBtn'); btn.disabled = false;
+  btn.textContent = 'Register'; btn.disabled = false;
   if (error) { showMsg(error.message, true); return; }
   if (data.user) {
     await sb.from('cpc_user_roles').insert({ user_id: data.user.id, email, display_name: name, role: 'user' }).then(()=>{}).catch(()=>{});
@@ -816,9 +556,6 @@ async function loadRole() {
     else { await sb.from('cpc_user_roles').insert({ user_id: currentUser.id, email: currentUser.email, display_name: userName, role: 'user' }).then(()=>{}).catch(()=>{}); }
   } catch(e) { console.log('Role error:', e); }
 }
-
-// Apply saved language on load
-applyLang();
 
 (async () => {
   const timer = setTimeout(async () => {
@@ -853,7 +590,6 @@ function setupApp() {
     document.getElementById('manage-btn').classList.remove('hidden');
     document.getElementById('admin-menu').classList.remove('hidden');
   }
-  applyLang();
 }
 
 function setupProfile() {
@@ -914,7 +650,7 @@ function closeViewer() { document.getElementById('app-viewer').classList.remove(
 async function loadHomeNews() {
   const { data } = await sb.from('cpc_announcements').select('*').order('created_at',{ascending:false}).limit(3);
   const el = document.getElementById('home-news');
-  if (!data||!data.length) { el.innerHTML='<div class="loading-text">' + (lang==="zh"?"暂无公告。":"No announcements yet.") + '</div>'; return; }
+  if (!data||!data.length) { el.innerHTML='<div class="loading-text">No announcements yet.</div>'; return; }
   const colors = {Safety:'#993C1D',Urgent:'#c0392b',HR:'#534AB7',Operations:'#185FA5',General:'#4a3728'};
   el.innerHTML = data.map(a=>`<div class="news-item"><div class="news-dot" style="background:${colors[a.category]||'#4a3728'}"></div><div><div class="news-title">${a.title}</div><div class="news-meta">${a.category} · ${timeAgo(a.created_at)}</div></div></div>`).join('');
 }
@@ -923,9 +659,9 @@ async function loadNewsPage() {
   el.innerHTML = '<div class="loading-text">Loading...</div>';
   const colors = {Safety:'#993C1D',Urgent:'#c0392b',HR:'#534AB7',Operations:'#185FA5',General:'#4a3728'};
   const { data } = await sb.from('cpc_announcements').select('*').order('created_at',{ascending:false});
-  let html = '<div class="section-head" style="padding:0 0 8px"><div class="section-title">' + t('companyAnnounce') + '</div></div>';
+  let html = '<div class="section-head" style="padding:0 0 8px"><div class="section-title">Company Announcements</div></div>';
   if (!data||!data.length) {
-    html += '<div class="loading-text" style="padding:1rem 0">' + t('noAnnounce') + '</div>';
+    html += '<div class="loading-text" style="padding:1rem 0">No announcements yet.</div>';
   } else {
     html += data.map(a=>{
       const att = a.attachment_url ? (a.attachment_type==='image' ?
@@ -935,8 +671,8 @@ async function loadNewsPage() {
 }${att}<div class="announce-meta">Posted by ${a.posted_by} · ${timeAgo(a.created_at)}</div></div>`;
     }).join('');
   }
-  html += '<div class="section-head" style="padding:14px 0 8px"><div class="section-title">' + t('industryNews') + '</div></div>';
-  html += '<div id="industry-news"><div class="loading-text">' + t('loadingIndustry') + '</div></div>';
+  html += '<div class="section-head" style="padding:14px 0 8px"><div class="section-title">Industry News</div></div>';
+  html += '<div id="industry-news"><div class="loading-text">Loading industry news...</div></div>';
   el.innerHTML = html;
   loadIndustryNews();
 }
@@ -945,33 +681,23 @@ async function loadIndustryNews() {
   const el = document.getElementById('industry-news');
   if (!el) return;
   try {
-    const { data: links } = await sb.from('cpc_news_links').select('*').eq('is_active', true).order('sort_order');
-    if (links && links.length) {
-      el.innerHTML = links.map(n => {
-        const title = lang === 'zh' && n.name_zh ? n.name_zh : n.name;
-        return `<div class="announce-card" onclick="window.open('${n.url}','_blank')" style="cursor:pointer">
-          <div class="announce-cat" style="background:rgba(24,95,165,0.1);color:#185FA5">${n.source_label}</div>
-          <div class="announce-title">${title}</div>
-          <div class="announce-meta">${t('tapToVisit')}</div>
-        </div>`;
-      }).join('');
-    } else {
-      el.innerHTML = '<div class="loading-text">No industry news links yet. Admin can add links.</div>';
-    }
-  } catch(e) {
-    el.innerHTML = '<div class="loading-text">Unable to load industry news.</div>';
-  }
+    const res = await fetch('https://api.rss2json.com/v1/api.json?rss_url=https://www.mom.gov.sg/rss/newsroom&count=5');
+    const d = await res.json();
+    if (d.status==='ok' && d.items && d.items.length) {
+      el.innerHTML = d.items.map(item=>`
+        <div class="announce-card" onclick="window.open('${item.link}','_blank')" style="cursor:pointer">
+          <div class="announce-cat" style="background:rgba(24,95,165,0.1);color:#185FA5">MOM</div>
+          <div class="announce-title">${item.title}</div>
+          <div class="announce-meta">${new Date(item.pubDate).toLocaleDateString('en-SG')} · Tap to read</div>
+        </div>`).join('');
+    } else { loadFallbackNews(el); }
+  } catch(e) { loadFallbackNews(el); }
 }
 
 function loadFallbackNews(el) {
-  const news = lang === 'zh' ? [
-    {title:'WSH理事会 — 工作场所安全与健康资源', url:'https://www.wshc.sg', source:'WSH Council'},
-    {title:'建设局 — 最新新闻与公告', url:'https://www.bca.gov.sg/news', source:'BCA'},
-    {title:'人力部 — 工作场所安全警报与公告', url:'https://www.mom.gov.sg/newsroom', source:'MOM'},
-    {title:'新加坡承包商协会 — 最新资讯', url:'https://www.scal.com.sg', source:'SCAL'},
-  ] : [
+  const news = [
     {title:'WSH Council — Workplace Safety & Health Resources', url:'https://www.wshc.sg', source:'WSH Council'},
-    {title:'BCA — Building & Construction Authority News', url:'https://www.bca.gov.sg/news', source:'BCA'},
+    {title:'BCA — Building & Construction Authority News', url:'https://www1.bca.gov.sg/news-publications/news', source:'BCA'},
     {title:'MOM — Work Safety Alerts & Advisories', url:'https://www.mom.gov.sg/newsroom', source:'MOM'},
     {title:'SCAL — Singapore Contractors Association', url:'https://www.scal.com.sg', source:'SCAL'},
   ];
@@ -979,7 +705,7 @@ function loadFallbackNews(el) {
     <div class="announce-card" onclick="window.open('${n.url}','_blank')" style="cursor:pointer">
       <div class="announce-cat" style="background:rgba(24,95,165,0.1);color:#185FA5">${n.source}</div>
       <div class="announce-title">${n.title}</div>
-      <div class="announce-meta">${t('tapToVisit')}</div>
+      <div class="announce-meta">Tap to visit website</div>
     </div>`).join('');
 }
 
@@ -1056,12 +782,9 @@ async function loadAdminData() {
   if (userRole!=='admin') return;
   const {data:apps} = await sb.from('cpc_apps').select('*').order('sort_order');
   const {data:anns} = await sb.from('cpc_announcements').select('*').order('created_at',{ascending:false});
-  const {data:links} = await sb.from('cpc_news_links').select('*').order('sort_order');
   document.getElementById('admin-apps-list').innerHTML = (apps||[]).map(a=>`<div class="admin-list-item"><div class="admin-item-info"><div class="admin-item-icon" style="background:${a.color}"><i class="ti ${a.icon}"></i></div><div><div class="admin-item-name">${a.name}</div><div class="admin-item-url">${a.url}</div></div></div><button class="del-btn" onclick="deleteApp('${a.id}')">Remove</button></div>`).join('')||'<div class="loading-text">No apps yet.</div>';
   document.getElementById('admin-announce-list').innerHTML = (anns||[]).map(a=>`<div class="admin-list-item"><div class="admin-item-info"><div><div class="admin-item-name">${a.title}</div><div class="admin-item-url">${a.category} · ${timeAgo(a.created_at)}</div></div></div><button class="del-btn" onclick="deleteAnn('${a.id}')">Delete</button></div>`).join('')||'<div class="loading-text">No announcements yet.</div>';
-  document.getElementById('admin-news-list').innerHTML = (links||[]).map(a=>`<div class="admin-list-item"><div class="admin-item-info"><div><div class="admin-item-name">${a.source_label} — ${a.name}</div><div class="admin-item-url">${a.url}</div></div></div><button class="del-btn" onclick="deleteNewsLink('${a.id}')">Remove</button></div>`).join('')||'<div class="loading-text">No links yet.</div>';
 }
-  
 function openModal(id) { document.getElementById(id).classList.add('open'); }
 function closeModal(id) { document.getElementById(id).classList.remove('open'); }
 async function saveApp() {
@@ -1115,49 +838,6 @@ async function saveAnnouncement() {
   annAttachFile = null;
   loadHomeNews();loadAdminData();
 }
-async function saveNewsLink() {
-  const name = document.getElementById('news-name-in').value.trim();
-  const name_zh = document.getElementById('news-name-zh-in').value.trim();
-  const url = document.getElementById('news-url-in').value.trim();
-  const source_label = document.getElementById('news-source-in').value.trim();
-  if (!name || !url || !source_label) { alert('Please fill in Name, URL and Source Label'); return; }
-  await sb.from('cpc_news_links').insert({ name, name_zh, url, source_label, sort_order: 99, is_active: true });
-  closeModal('modal-addnews');
-  document.getElementById('news-name-in').value = '';
-  document.getElementById('news-name-zh-in').value = '';
-  document.getElementById('news-url-in').value = '';
-  document.getElementById('news-source-in').value = '';
-  loadAdminData();
-}
-
-async function deleteNewsLink(id) {
-  if (!confirm('Remove this news link?')) return;
-  await sb.from('cpc_news_links').delete().eq('id', id);
-  loadAdminData();
-}
-
-async function saveNewsLink() {
-  const name = document.getElementById('news-name-in').value.trim();
-  const name_zh = document.getElementById('news-name-zh-in').value.trim();
-  const url = document.getElementById('news-url-in').value.trim();
-  const source_label = document.getElementById('news-source-in').value.trim();
-  if (!name || !url || !source_label) { alert('Please fill in Name, URL and Source Label'); return; }
-  await sb.from('cpc_news_links').insert({ name, name_zh, url, source_label, sort_order: 99, is_active: true });
-  closeModal('modal-addnews');
-  document.getElementById('news-name-in').value = '';
-  document.getElementById('news-name-zh-in').value = '';
-  document.getElementById('news-url-in').value = '';
-  document.getElementById('news-source-in').value = '';
-  loadAdminData();
-}
-
-async function deleteNewsLink(id) {
-  if (!confirm('Remove this news link?')) return;
-  await sb.from('cpc_news_links').delete().eq('id', id);
-  loadAdminData();
-}
-
-  
 async function deleteAnn(id) { if(!confirm('Delete this announcement?'))return; await sb.from('cpc_announcements').delete().eq('id',id); loadHomeNews();loadAdminData(); }
 
 async function doChangePassword() {
