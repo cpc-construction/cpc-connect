@@ -343,6 +343,13 @@ html, body { height: 100%; background: var(--cream); font-family: -apple-system,
           </div>
           <div id="admin-announce-list"><div class="loading-text">Loading...</div></div>
         </div>
+        <div class="admin-section">
+          <div class="admin-section-head">
+            <div class="admin-section-title" id="admin-news-title">Industry News Links</div>
+            <button class="add-btn" id="add-news-btn" onclick="openModal('modal-addnews')"><i class="ti ti-plus"></i> Add</button>
+          </div>
+          <div id="admin-news-list"><div class="loading-text">Loading...</div></div>
+        </div>
       </div>
     </div>
 
@@ -455,6 +462,21 @@ html, body { height: 100%; background: var(--cream); font-family: -apple-system,
     <div class="modal-btns">
       <button class="modal-cancel" id="cancel-ann-btn" onclick="closeModal('modal-announce');annAttachFile=null;document.getElementById('ann-attach-preview').textContent=''">Cancel</button>
       <button class="modal-save" id="save-ann-btn" onclick="saveAnnouncement()">Post</button>
+    </div>
+  </div>
+</div>
+
+<!-- ADD NEWS LINK MODAL -->
+<div class="modal-overlay" id="modal-addnews">
+  <div class="modal">
+    <div class="modal-title" id="add-news-modal-title">Add News Link</div>
+    <div class="modal-field"><label id="label-news-name">Name (English)</label><input type="text" id="news-name-in" placeholder="e.g. BCA — Latest News"/></div>
+    <div class="modal-field"><label id="label-news-name-zh">名称 (中文)</label><input type="text" id="news-name-zh-in" placeholder="例如：建设局 — 最新新闻"/></div>
+    <div class="modal-field"><label id="label-news-url">URL (paste here)</label><input type="url" id="news-url-in" placeholder="https://www.bca.gov.sg/news"/></div>
+    <div class="modal-field"><label id="label-news-source">Source Label</label><input type="text" id="news-source-in" placeholder="e.g. BCA"/></div>
+    <div class="modal-btns">
+      <button class="modal-cancel" id="cancel-news-btn" onclick="closeModal('modal-addnews')">Cancel</button>
+      <button class="modal-save" id="save-news-btn" onclick="saveNewsLink()">Add</button>
     </div>
   </div>
 </div>
@@ -681,6 +703,18 @@ function applyLang() {
       el.textContent = lang === 'zh' ? '暂无应用。' : 'No apps yet.';
     }
   });
+
+  // News links admin section
+  const adminNewsTitle = document.getElementById('admin-news-title');
+  if (adminNewsTitle) adminNewsTitle.textContent = t('industryNewsLinks');
+  const addNewsBtn = document.getElementById('add-news-btn');
+  if (addNewsBtn) addNewsBtn.innerHTML = '<i class="ti ti-plus"></i> ' + (lang==='zh'?'添加':'Add');
+  const addNewsModalTitle = document.getElementById('add-news-modal-title');
+  if (addNewsModalTitle) addNewsModalTitle.textContent = t('addNewsLink');
+  const cancelNewsBtn = document.getElementById('cancel-news-btn');
+  if (cancelNewsBtn) cancelNewsBtn.textContent = t('cancel');
+  const saveNewsBtn = document.getElementById('save-news-btn');
+  if (saveNewsBtn) saveNewsBtn.textContent = lang==='zh'?'添加':'Add';
 
   // Delete message sheet
   const delTitle = document.querySelector('.msg-delete-title');
@@ -909,28 +943,33 @@ async function loadIndustryNews() {
   const el = document.getElementById('industry-news');
   if (!el) return;
   try {
-    const res = await fetch('https://api.rss2json.com/v1/api.json?rss_url=https://www.mom.gov.sg/rss/newsroom&count=5');
-    const d = await res.json();
-    if (d.status==='ok' && d.items && d.items.length) {
-      el.innerHTML = d.items.map(item=>`
-        <div class="announce-card" onclick="window.open('${item.link}','_blank')" style="cursor:pointer">
-          <div class="announce-cat" style="background:rgba(24,95,165,0.1);color:#185FA5">MOM</div>
-          <div class="announce-title">${item.title}</div>
-          <div class="announce-meta">${new Date(item.pubDate).toLocaleDateString('en-SG')} · Tap to read</div>
-        </div>`).join('');
-    } else { loadFallbackNews(el); }
-  } catch(e) { loadFallbackNews(el); }
+    const { data: links } = await sb.from('cpc_news_links').select('*').eq('is_active', true).order('sort_order');
+    if (links && links.length) {
+      el.innerHTML = links.map(n => {
+        const title = lang === 'zh' && n.name_zh ? n.name_zh : n.name;
+        return `<div class="announce-card" onclick="window.open('${n.url}','_blank')" style="cursor:pointer">
+          <div class="announce-cat" style="background:rgba(24,95,165,0.1);color:#185FA5">${n.source_label}</div>
+          <div class="announce-title">${title}</div>
+          <div class="announce-meta">${t('tapToVisit')}</div>
+        </div>`;
+      }).join('');
+    } else {
+      el.innerHTML = '<div class="loading-text">No industry news links yet. Admin can add links.</div>';
+    }
+  } catch(e) {
+    el.innerHTML = '<div class="loading-text">Unable to load industry news.</div>';
+  }
 }
 
 function loadFallbackNews(el) {
   const news = lang === 'zh' ? [
     {title:'WSH理事会 — 工作场所安全与健康资源', url:'https://www.wshc.sg', source:'WSH Council'},
-    {title:'建设局 — 最新新闻与公告', url:'https://www.bca.gov.sg/news-publications/news', source:'BCA'},
+    {title:'建设局 — 最新新闻与公告', url:'https://www.bca.gov.sg/news', source:'BCA'},
     {title:'人力部 — 工作场所安全警报与公告', url:'https://www.mom.gov.sg/newsroom', source:'MOM'},
     {title:'新加坡承包商协会 — 最新资讯', url:'https://www.scal.com.sg', source:'SCAL'},
   ] : [
     {title:'WSH Council — Workplace Safety & Health Resources', url:'https://www.wshc.sg', source:'WSH Council'},
-    {title:'BCA — Building & Construction Authority News', url:'https://www.bca.gov.sg/news-publications/news', source:'BCA'},
+    {title:'BCA — Building & Construction Authority News', url:'https://www.bca.gov.sg/news', source:'BCA'},
     {title:'MOM — Work Safety Alerts & Advisories', url:'https://www.mom.gov.sg/newsroom', source:'MOM'},
     {title:'SCAL — Singapore Contractors Association', url:'https://www.scal.com.sg', source:'SCAL'},
   ];
@@ -1015,8 +1054,10 @@ async function loadAdminData() {
   if (userRole!=='admin') return;
   const {data:apps} = await sb.from('cpc_apps').select('*').order('sort_order');
   const {data:anns} = await sb.from('cpc_announcements').select('*').order('created_at',{ascending:false});
+  const {data:links} = await sb.from('cpc_news_links').select('*').order('sort_order');
   document.getElementById('admin-apps-list').innerHTML = (apps||[]).map(a=>`<div class="admin-list-item"><div class="admin-item-info"><div class="admin-item-icon" style="background:${a.color}"><i class="ti ${a.icon}"></i></div><div><div class="admin-item-name">${a.name}</div><div class="admin-item-url">${a.url}</div></div></div><button class="del-btn" onclick="deleteApp('${a.id}')">Remove</button></div>`).join('')||'<div class="loading-text">No apps yet.</div>';
   document.getElementById('admin-announce-list').innerHTML = (anns||[]).map(a=>`<div class="admin-list-item"><div class="admin-item-info"><div><div class="admin-item-name">${a.title}</div><div class="admin-item-url">${a.category} · ${timeAgo(a.created_at)}</div></div></div><button class="del-btn" onclick="deleteAnn('${a.id}')">Delete</button></div>`).join('')||'<div class="loading-text">No announcements yet.</div>';
+  document.getElementById('admin-news-list').innerHTML = (links||[]).map(a=>`<div class="admin-list-item"><div class="admin-item-info"><div><div class="admin-item-name">${a.source_label} — ${a.name}</div><div class="admin-item-url">${a.url}</div></div></div><button class="del-btn" onclick="deleteNewsLink('${a.id}')">Remove</button></div>`).join('')||'<div class="loading-text">No links yet.</div>';
 }
 function openModal(id) { document.getElementById(id).classList.add('open'); }
 function closeModal(id) { document.getElementById(id).classList.remove('open'); }
@@ -1071,6 +1112,27 @@ async function saveAnnouncement() {
   annAttachFile = null;
   loadHomeNews();loadAdminData();
 }
+async function saveNewsLink() {
+  const name = document.getElementById('news-name-in').value.trim();
+  const name_zh = document.getElementById('news-name-zh-in').value.trim();
+  const url = document.getElementById('news-url-in').value.trim();
+  const source_label = document.getElementById('news-source-in').value.trim();
+  if (!name || !url || !source_label) { alert('Please fill in Name, URL and Source Label'); return; }
+  await sb.from('cpc_news_links').insert({ name, name_zh, url, source_label, sort_order: 99, is_active: true });
+  closeModal('modal-addnews');
+  document.getElementById('news-name-in').value = '';
+  document.getElementById('news-name-zh-in').value = '';
+  document.getElementById('news-url-in').value = '';
+  document.getElementById('news-source-in').value = '';
+  loadAdminData();
+}
+
+async function deleteNewsLink(id) {
+  if (!confirm('Remove this news link?')) return;
+  await sb.from('cpc_news_links').delete().eq('id', id);
+  loadAdminData();
+}
+
 async function deleteAnn(id) { if(!confirm('Delete this announcement?'))return; await sb.from('cpc_announcements').delete().eq('id',id); loadHomeNews();loadAdminData(); }
 
 async function doChangePassword() {
