@@ -921,7 +921,7 @@ async function loadNewsPage() {
   el.innerHTML = '<div class="loading-text">Loading...</div>';
   const colors = {Safety:'#993C1D',Urgent:'#c0392b',HR:'#534AB7',Operations:'#185FA5',General:'#4a3728'};
   const { data } = await sb.from('cpc_announcements').select('*').order('created_at',{ascending:false});
-  let html = '<div class="section-head" style="padding:0 0 8px"><div class="section-title">Company Announcements</div></div>';
+  let html = '<div class="section-head" style="padding:0 0 8px"><div class="section-title">' + t('companyAnnounce') + '</div></div>';
   if (!data||!data.length) {
     html += '<div class="loading-text" style="padding:1rem 0">' + t('noAnnounce') + '</div>';
   } else {
