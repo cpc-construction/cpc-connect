@@ -1061,6 +1061,7 @@ async function loadAdminData() {
   document.getElementById('admin-announce-list').innerHTML = (anns||[]).map(a=>`<div class="admin-list-item"><div class="admin-item-info"><div><div class="admin-item-name">${a.title}</div><div class="admin-item-url">${a.category} · ${timeAgo(a.created_at)}</div></div></div><button class="del-btn" onclick="deleteAnn('${a.id}')">Delete</button></div>`).join('')||'<div class="loading-text">No announcements yet.</div>';
   document.getElementById('admin-news-list').innerHTML = (links||[]).map(a=>`<div class="admin-list-item"><div class="admin-item-info"><div><div class="admin-item-name">${a.source_label} — ${a.name}</div><div class="admin-item-url">${a.url}</div></div></div><button class="del-btn" onclick="deleteNewsLink('${a.id}')">Remove</button></div>`).join('')||'<div class="loading-text">No links yet.</div>';
 }
+  
 function openModal(id) { document.getElementById(id).classList.add('open'); }
 function closeModal(id) { document.getElementById(id).classList.remove('open'); }
 async function saveApp() {
@@ -1135,6 +1136,28 @@ async function deleteNewsLink(id) {
   loadAdminData();
 }
 
+async function saveNewsLink() {
+  const name = document.getElementById('news-name-in').value.trim();
+  const name_zh = document.getElementById('news-name-zh-in').value.trim();
+  const url = document.getElementById('news-url-in').value.trim();
+  const source_label = document.getElementById('news-source-in').value.trim();
+  if (!name || !url || !source_label) { alert('Please fill in Name, URL and Source Label'); return; }
+  await sb.from('cpc_news_links').insert({ name, name_zh, url, source_label, sort_order: 99, is_active: true });
+  closeModal('modal-addnews');
+  document.getElementById('news-name-in').value = '';
+  document.getElementById('news-name-zh-in').value = '';
+  document.getElementById('news-url-in').value = '';
+  document.getElementById('news-source-in').value = '';
+  loadAdminData();
+}
+
+async function deleteNewsLink(id) {
+  if (!confirm('Remove this news link?')) return;
+  await sb.from('cpc_news_links').delete().eq('id', id);
+  loadAdminData();
+}
+
+  
 async function deleteAnn(id) { if(!confirm('Delete this announcement?'))return; await sb.from('cpc_announcements').delete().eq('id',id); loadHomeNews();loadAdminData(); }
 
 async function doChangePassword() {
